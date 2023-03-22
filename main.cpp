@@ -1,7 +1,9 @@
 #include <SDL2/SDL.h>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <cmath>
+#include "parseOBJ.cpp"
 #include <iostream>
 using namespace std;
 
@@ -77,9 +79,9 @@ int main()
         SDL_RenderGeometry(renderer,nullptr,verts.data(),verts.size(),nullptr,0);
         SDL_RenderDrawPoint(renderer,960,540);
 
-        SDL_RenderPresent(renderer);
         SDL_Delay(10);
     }
+    parse();
 
     return 0;
 }
