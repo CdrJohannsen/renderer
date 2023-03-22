@@ -64,9 +64,12 @@ int main()
     
         const std::vector< SDL_Vertex > verts =
         {
-            { SDL_FPoint{ 960+getCos(ry)*getCos(0+rz)*size, 540+getSin(rx)*getSin(0+rz)*size }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
-            { SDL_FPoint{ 960+getCos(ry)*getCos(120+rz)*size, 540+getSin(rx)*getSin(120+rz)*size }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
-            { SDL_FPoint{ 960+getCos(ry)*getCos(240+rz)*size, 540+getSin(rx)*getSin(240+rz)*size }, SDL_Color{ 255,255,255,255}, SDL_FPoint{ 0 }, }
+            { SDL_FPoint{ 100,100 }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
+            { SDL_FPoint{ 0,100 }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
+            { SDL_FPoint{ 0,0 }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
+            { SDL_FPoint{ 100,100 }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
+            { SDL_FPoint{ 100,0 }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
+            { SDL_FPoint{ 0,0 }, SDL_Color{ 255,255,255,255 }, SDL_FPoint{ 0 }, },
         };
 
         SDL_SetRenderDrawColor(renderer,0,0,0,255);
