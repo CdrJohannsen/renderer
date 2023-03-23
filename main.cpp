@@ -3,8 +3,8 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include "parseOBJ.cpp"
 #include "vect.cpp"
+#include "parseOBJ.cpp"
 #include <iostream>
 using namespace std;
 
