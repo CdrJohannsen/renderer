@@ -3,35 +3,22 @@
 #include <iostream>
 using namespace std;
 
-class Vect {
+class Face {
     public:
-        float x;
-        float y;
-        float z;
-        Vect operator + (Vect a){return Vect {x+a.x,y+a.y,z+a.z};}
-        Vect operator - (Vect a){return Vect {x-a.x,y-a.y,z-a.z};}
-        Vect operator * (Vect a){return Vect {x*a.x,y*a.y,z*a.z};}
-        Vect operator * (float a){return Vect {x*a,y*a,z*a};}
-        Vect operator / (Vect a){return Vect {x/a.x,y/a.y,z/a.z};}
-        Vect operator / (float a){return Vect {x/a,y/a,z/a};}
-        void operator += (Vect a) { x += a.x;y+=a.y; }
-        void operator -= (Vect a) { x -= a.x;y-=a.y; }
-        void operator *= (Vect a) { x *= a.x;y*=a.y; }
-        void operator *= (float a) { x *= a;y*=a; }
-        void operator /= (Vect a) { x /= a.x;y/=a.y; }
-        Vect(float a,float b,float c) {x=a;y=b;z=c;}
-        //Vect(float a[]) {x=a[0];y=a[1];z=a[2];}
-        void reverse() {
-            float a=x;
-            x=y;
-            y=a;
-        }
-        float length() {
-            return sqrt(pow(x,2)+pow(y,2));
-        }
+        int vert_a;
+        int vert_b;
+        int vert_c;
+        int tex_a;
+        int tex_b;
+        int tex_c;
+        int norm_a;
+        int norm_b;
+        int norm_c;
+
+        Face(int x,int y,int z) {vert_a=x;vert_b=y;vert_c=z;}
 };
 
-std::ostream& operator << (std::ostream& out,Vect const& a) {
-    out << "x: "<<a.x<<" y: "<<a.y<< " z: "<<a.z<<endl;
+std::ostream& operator << (std::ostream& out,Face const& a) {
+    out << "1: "<<a.vert_a<<" 2: "<<a.vert_b<< " 3: "<<a.vert_c;
     return out;
 }

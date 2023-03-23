@@ -4,16 +4,16 @@
 #include <iostream>
 using namespace std;
 
-vector<float> split(string text,string at){
-    vector<float> splitted;
+vector<string> split(string text,string at){
+    vector<string> splitted;
     size_t pos = 0;
     string segment;
     while ((pos = text.find(at)) != string::npos) {
         segment = text.substr(0, pos);
         text.erase(0, pos + at.length());
-        splitted.push_back(stof(segment));
+        splitted.push_back(segment);
     }
-    splitted.push_back(stof(text));
+    splitted.push_back(text);
     //string* d = splitted.data();
     //cout << d[0] << endl;
     return splitted;
@@ -23,28 +23,30 @@ void parse(){
     string line;
     string n;
     ifstream model ("cube.obj");
-    vector<vector<float>> vert;
-    vector<vector<float>> face;
+    vector<vector<string>> vert;
+    vector<vector<string>> face;
     while(!model.eof()){
         getline(model,line);
-        if (line[0]=='v'){
-            if (line[1]=='n'){continue;}
-            if (line[1]=='t'){continue;}
+        if (line.substr(0,2)=="v "){
             line.erase(0,2);
-            vert.push_back(split(line," "));
+            vector<string> a = split(line," ");
+            vert.push_back(a);
         }
         else if (line[0]=='f'){
             line.erase(0,1);
             face.push_back(split(line," "));
         }
     }
-    //vector<string> values;
-    //values=*v.data();
     vector<Vect> verticies;
-    for (vector<float> i:vert){
-        Vect a = {i[0],i[1],i[2]};
-        cout << a;
+    for (vector<string> i:vert){
+        Vect a = {stof(i[0]),stof(i[1]),stof(i[2])};
+        cout << a<<endl;
         verticies.push_back(a);
+    }
+    for (vector<string> i:face){
+        v = 
+        Face a = {}
+        cout << i[1]<<endl;
     }
     return;
 }

@@ -1,1 +1,2 @@
 Faces are combined of the indices of their verticies.
+use SDL_Vertex
