@@ -32,6 +32,6 @@ class Vect {
 };
 
 std::ostream& operator << (std::ostream& out,Vect const& a) {
-    out << "x: "<<a.x<<" y: "<<a.y<< " z: "<<a.z<<endl;
+    out << "x: "<<a.x<<" y: "<<a.y<< " z: "<<a.z;
     return out;
 }

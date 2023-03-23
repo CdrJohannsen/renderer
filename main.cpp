@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include "vect.cpp"
+#include "face.cpp"
 #include "parseOBJ.cpp"
 #include <iostream>
 using namespace std;
