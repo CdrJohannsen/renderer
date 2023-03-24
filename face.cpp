@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-class Face {
+struct Face {
     public:
         Vect* vert_a;
         Vect* vert_b;
@@ -12,7 +12,7 @@ class Face {
         float* norm_a;
         float* norm_b;
         float* norm_c;
-        //Face(Vect* x,Vect* y,Vect* z) {vert_a=x;vert_b=y;vert_c=z;}
+        //Face(Vect* x,Vect y,Vect* z) {*vert_a=*x;vert_b=y;*vert_c=*z;}
 };
 
 std::ostream& operator << (std::ostream& out,Face const& a) {
