@@ -1,11 +1,11 @@
 CC = g++
 TARGET = main
 LDLIBS=-lSDL2
-CFLAGS= -Wall
+CFLAGS= -Wall -g
 
 all: $(TARGET)
 	make clear
-	$(CC) -o $(TARGET) $(TARGET).cpp $(LDLIBS)
+	$(CC) -o $(TARGET) $(TARGET).cpp $(LDLIBS) $(CFLAGS)
 
 run:
 	make all
