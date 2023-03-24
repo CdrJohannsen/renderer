@@ -33,20 +33,25 @@ void parse(){
             vert.push_back(a);
         }
         else if (line[0]=='f'){
-            line.erase(0,1);
+            line.erase(0,2);
             face.push_back(split(line," "));
         }
     }
     vector<Vect> verticies;
     for (vector<string> i:vert){
         Vect a = {stof(i[0]),stof(i[1]),stof(i[2])};
-        cout << a<<endl;
         verticies.push_back(a);
     }
     for (vector<string> i:face){
-        v = 
-        Face a = {}
-        cout << i[1]<<endl;
+        Face a;
+        vector<vector<string>> faces;
+        for (string j:i){
+            faces.push_back(split(j,"/"));
+        }
+        *a.vert_a = verticies[stoi(faces[0][0])];
+        *a.vert_b = verticies[stoi(faces[1][0])];
+        //*a.vert_c = verticies[stoi(faces[2][0])];
+        //cout << a <<endl;
     }
     return;
 }
