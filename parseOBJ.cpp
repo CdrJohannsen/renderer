@@ -19,7 +19,7 @@ vector<string> split(string text,string at){
     return splitted;
 }
 
-void parse(){
+vector<Face> parse(){
     string line;
     string n;
     ifstream model ("cube.obj");
@@ -42,24 +42,21 @@ void parse(){
         Vect a = {stof(i[0]),stof(i[1]),stof(i[2])};
         verticies.push_back(a);
     }
+    vector<Face> faces;
     for (vector<string> i:face){
-        vector<vector<string>> faces;
+        vector<vector<string>> face_string;
         for (string j:i){
-            faces.push_back(split(j,"/"));
+            face_string.push_back(split(j,"/"));
         }
         Face f;
-        *f.vert_a = verticies[stoi(faces[0][0])];
-        cout << faces[1][0]<<endl;
-        cout << verticies[0]<<endl;
-        Vect v(1.0f,1.0f,1.0f);
-        cout << v<<endl;
-        *f.vert_b=v;
-        //Face f = {*verticies[stoi(faces[0][0])],*verticies[stoi(faces[1][0])],*verticies[stoi(faces[2][0])]};
-        cout << f << endl;
-        //a.vert_b = verticies[stoi(faces[0][0])];
-        //*a.vert_c = verticies[stoi(faces[2][0])];
-        //cout << a <<endl;
+        f.vert_a = verticies[stoi(face_string[0][0])-1];
+        f.vert_b = verticies[stoi(face_string[1][0])-1];
+        f.vert_c = verticies[stoi(face_string[2][0])-1];
+        f.norm_a = stoi(face_string[0][2])-1.0f;
+        f.norm_b = stoi(face_string[1][2])-1.0f;
+        f.norm_c = stoi(face_string[2][2])-1.0f;
+        faces.push_back(f);
     }
-    return;
+    return faces;
 }
 
