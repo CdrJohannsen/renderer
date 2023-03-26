@@ -18,26 +18,29 @@ float getSin(int degree) {
     return sin((M_PI/180)*degree);
 }
 
-tuple<float,float> convert3Dto2D(x,y,z){
-    return make_tuple(x2,y2)
+tuple<float,float> convert3Dto2D(float x,float y,float z){
+    float x2=x;
+    float y2=y;
+    return make_tuple(x2,y2);
 }
 
 vector<SDL_Vertex> faceToVerts(Face face){
     cout<<face<<endl;
+    float x, y;
     tie(x,y) = convert3Dto2D(face.vert_a.x,face.vert_a.y,face.vert_a.z);
     vector<SDL_Vertex> verts= {
         {
-            SDL_FPoint{face.vert_a.x,face.vert_a.y,face.vert_a.z},
+            SDL_FPoint{x,y},
             SDL_Color{255,255,255,255},
             SDL_FPoint{0}
         },
         {
-            SDL_FPoint{face.vert_b.x,face.vert_b.y,face.vert_b.z},
+            SDL_FPoint{x,y},
             SDL_Color{255,255,0,255},
             SDL_FPoint{0}
         },
         {
-            SDL_FPoint{face.vert_c.x,face.vert_c.y,face.vert_c.z},
+            SDL_FPoint{x,y},
             SDL_Color{255,0,255,255},
             SDL_FPoint{0}
         },
@@ -56,7 +59,7 @@ int main()
     SDL_Renderer* renderer = nullptr;
     SDL_Event e;
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(1920,1080,0,&window, &renderer);
+    SDL_CreateWindowAndRenderer(1920,1080,SDL_WINDOW_RESIZABLE|SDL_WINDOW_OPENGL,&window, &renderer);
 
     SDL_SetRenderDrawColor(renderer,0,0,0,255);
     SDL_RenderClear(renderer);
