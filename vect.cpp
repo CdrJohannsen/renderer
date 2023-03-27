@@ -10,6 +10,7 @@ class Vect {
         float z;
         Vect operator + (Vect a){return Vect {x+a.x,y+a.y,z+a.z};}
         Vect operator - (Vect a){return Vect {x-a.x,y-a.y,z-a.z};}
+        Vect operator - (float a){return Vect {x-a,y-a,z-a};}
         Vect operator * (Vect a){return Vect {x*a.x,y*a.y,z*a.z};}
         Vect operator * (float a){return Vect {x*a,y*a,z*a};}
         Vect operator / (Vect a){return Vect {x/a.x,y/a.y,z/a.z};}
@@ -20,6 +21,7 @@ class Vect {
         void operator *= (float a) { x *= a;y*=a; }
         void operator /= (Vect a) { x /= a.x;y/=a.y; }
         Vect(float a,float b,float c) {x=a;y=b;z=c;}
+        Vect() {}
         //Vect(float a[]) {x=a[0];y=a[1];z=a[2];}
         void reverse() {
             float a=x;

@@ -5,15 +5,15 @@ using namespace std;
 
 class Face {
     public:
-        Vect vert_a=Vect(0,0,0);
-        Vect vert_b=Vect(0,0,0);
-        Vect vert_c=Vect(0,0,0);
+        int vert_a;
+        int vert_b;
+        int vert_c;
         SDL_FPoint tex_vert;
-        float norm_a;
-        float norm_b;
-        float norm_c;
+        int norm_a;
+        int norm_b;
+        int norm_c;
         Face() {}
-        Face(Vect a, Vect b, Vect c) {vert_a=a;vert_b=b;vert_c=c;}
+        Face(int a, int b, int c) {vert_a=a;vert_b=b;vert_c=c;}
 };
 
 std::ostream& operator << (std::ostream& out,Face const& a) {
