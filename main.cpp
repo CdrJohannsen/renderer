@@ -44,8 +44,12 @@ float dot(Vect a, Vect b){
     return a.x*b.x+a.y+b.y+a.z+b.z;
 }
 
-void renderTriangle(SDL_Renderer* renderer,vector<SDL_Vertex> &v){
-    SDL_RenderDrawLine(renderer,v[0].x)
+void renderTriangle(SDL_Renderer* renderer,vector<SDL_Vertex> v){
+    cout << v[0].position.x << " " << v[1].position.y << endl;
+    SDL_SetRenderDrawColor(renderer,255,255,255,255);
+    SDL_RenderDrawLine(renderer,v[0].position.x,v[0].position.y,v[1].position.x,v[1].position.y);
+    SDL_RenderDrawLine(renderer,v[1].position.x,v[1].position.y,v[2].position.x,v[2].position.y);
+    SDL_RenderDrawLine(renderer,v[2].position.x,v[2].position.y,v[0].position.x,v[0].position.y);
 }
 
 tuple<float,float> convert3Dto2D(Vect v){
@@ -91,10 +95,9 @@ tuple<float,float> convert3Dto2D(Vect v){
     float dx=getCos(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
     float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
     float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    float x = (5/dz)*dx;
-    float y = (5/dz)*dy;
-    cout << x << " " << y << endl;
-    return make_tuple(x*960,y*540);
+    float x = (90/dz)*dx;
+    float y = (90/dz)*dy;
+    return make_tuple(x,y);
 }
 
 void drawFace(SDL_Renderer** renderer,Face &face){
@@ -120,7 +123,8 @@ void drawFace(SDL_Renderer** renderer,Face &face){
             SDL_FPoint{0}
         },
     };
-    SDL_RenderGeometry(*renderer,nullptr,verts.data(),verts.size(),nullptr,0);
+    //SDL_RenderGeometry(*renderer,nullptr,verts.data(),verts.size(),nullptr,0);
+    renderTriangle(*renderer,verts);
     return;
 }
 
@@ -184,6 +188,7 @@ int main()
                 break;
             }
         }
+        SDL_SetRenderDrawColor(renderer,0,0,0,255);
         SDL_RenderClear(renderer);
         //cr = cr/cr.length();
         for (Face &face:faces){
