@@ -23,13 +23,8 @@ class Vect {
         Vect(float a,float b,float c) {x=a;y=b;z=c;}
         Vect() {}
         //Vect(float a[]) {x=a[0];y=a[1];z=a[2];}
-        void reverse() {
-            float a=x;
-            x=y;
-            y=a;
-        }
         float length() {
-            return sqrt(pow(x,2)+pow(y,2));
+            return sqrt(pow(x,2)+pow(y,2)+pow(z,2));
         }
 };
 
