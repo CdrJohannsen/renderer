@@ -91,13 +91,13 @@ tuple<float,float> convert3Dto2D(Vect v){
     float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
     float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
     */
-    Vect diff=v-c;
+    Vect diff=c-v;
     float dx=getCos(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
     float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
     float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    float x = (90/dz)*dx;
-    float y = (90/dz)*dy;
-    return make_tuple(x,y);
+    float x = (4/dz)*dx;
+    float y = (4/dz)*dy;
+    return make_tuple(x*HEIGTH/2,y*HEIGTH/2);
 }
 
 void drawFace(SDL_Renderer** renderer,Face &face){
@@ -105,7 +105,7 @@ void drawFace(SDL_Renderer** renderer,Face &face){
     tie(x1,y1) = convert3Dto2D(verticies[face.vert_a]);
     tie(x2,y2) = convert3Dto2D(verticies[face.vert_b]);
     tie(x3,y3) = convert3Dto2D(verticies[face.vert_c]);
-    //if (dot(normals[face.norm_a],cr)>0){return;}
+    if (dot(normals[face.norm_a],cr)>0){return;}
     const vector<SDL_Vertex> verts={
         {
             SDL_FPoint{960+x1,540+y1},
@@ -153,21 +153,25 @@ int main()
             else if(e.type == SDL_KEYDOWN)
             {
                 if(SDLK_d == e.key.keysym.sym) {
-                    c.x += 1;
+                    c.x += cr.z;
+                    c.z += -cr.x;
                 }
                 else if(SDLK_a == e.key.keysym.sym) {
-                    c.x -= 1;
+                    c.x += -cr.z;
+                    c.z += cr.x;
                 }
                 else if(SDLK_w == e.key.keysym.sym) {
-                    c += cr;
+                    c.x += cr.x;
+                    c.z += cr.z;
                 }
                 else if(SDLK_s == e.key.keysym.sym) {
-                    c -= cr;
+                    c.x -= cr.x;
+                    c.z -= cr.z;
                 }
-                else if(SDLK_e == e.key.keysym.sym) {
+                else if(SDLK_SPACE == e.key.keysym.sym) {
                     c.y += 1;
                 }
-                else if(SDLK_q == e.key.keysym.sym) {
+                else if(SDLK_LSHIFT == e.key.keysym.sym) {
                     c.y -= 1;
                 }
                 else if(SDLK_RIGHT == e.key.keysym.sym) {
