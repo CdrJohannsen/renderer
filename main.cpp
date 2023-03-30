@@ -18,7 +18,7 @@ using namespace std;
 #define NEAR 0.1f
 #define FAR 1000.0f
 #define FOV 90.0f
-#define FOVRAD 1.0f/tan(90*0.5f/180.0f*M_PI)
+#define FOVRAD 1.0f/tan(FOV*0.5f/180.0f*M_PI)
 
 
 void MatrixMultiply(Vect &i,Vect &o,Matrix4x4 &m){
@@ -30,8 +30,8 @@ void MatrixMultiply(Vect &i,Vect &o,Matrix4x4 &m){
     if (w!=0){o.x/=w;o.y/=w;o.z/=w;}
 }
 
-Vect cr={0,1,0};
-Vect c={2,2,2};
+Vect cr={0,0,0};
+Vect c={0,0,0};
 
 float getCos(int degree) {
     return cos((M_PI/180)*degree);
@@ -63,7 +63,6 @@ void renderTriangle(SDL_Renderer* renderer,vector<SDL_Vertex> v){
 }
 
 tuple<float,float> convert3Dto2D(Vect v){
-    /*
     Matrix4x4 projMat;
     projMat.m[0][0]=RATIO/FOVRAD;
     projMat.m[1][1]=FOVRAD;
@@ -73,41 +72,48 @@ tuple<float,float> convert3Dto2D(Vect v){
     projMat.m[3][3]=0.0f;
     Matrix4x4 rotxMat;
     rotxMat.m[0][0]=1;
-    rotxMat.m[1][1]=getCos(cx);
-    rotxMat.m[2][2]=getCos(cx);
-    rotxMat.m[1][2]=getSin(cx);
-    rotxMat.m[2][1]=(-getSin(cx));
+    rotxMat.m[1][1]=getCos(cr.x);
+    rotxMat.m[1][2]=getSin(cr.x);
+    rotxMat.m[2][1]=(-getSin(cr.x));
+    rotxMat.m[2][2]=getCos(cr.x);
+    rotxMat.m[3][3]=1;
     Matrix4x4 rotyMat;
-    rotyMat.m[0][0]=getCos(cy);
+    rotyMat.m[0][0]=getCos(cr.y);
     rotyMat.m[1][1]=1;
-    rotyMat.m[2][2]=getCos(cy);
-    rotyMat.m[0][2]=getSin(cy);
-    rotyMat.m[2][0]=(-getSin(cy));
+    rotyMat.m[2][2]=getCos(cr.y);
+    rotyMat.m[0][2]=(-getSin(cr.y));
+    rotyMat.m[2][0]=getSin(cr.y);
+    rotyMat.m[3][3]=1;
     Matrix4x4 rotzMat;
-    rotzMat.m[0][0]=getCos(cz);
-    rotzMat.m[1][1]=1;
-    rotzMat.m[2][2]=getCos(cz);
-    rotzMat.m[0][2]=getSin(cz);
-    rotzMat.m[2][0]=(-getSin(cz));
+    rotzMat.m[0][0]=getCos(cr.z);
+    rotzMat.m[0][1]=getSin(cr.z);
+    rotzMat.m[1][0]=(-getSin(cr.z));
+    rotzMat.m[1][1]=getCos(cr.z);
+    rotzMat.m[2][2]=1;
+    rotzMat.m[3][3]=1;
     Vect o1;
     Vect o2;
     Vect o3;
     Vect o4;
-    MatrixMultiply(v,o1,projMat);
-    MatrixMultiply(o1,o2,rotyMat);
+    Vect diff=c-v;
+    MatrixMultiply(diff,o1,projMat);
+    MatrixMultiply(o1,o2,rotzMat);
     MatrixMultiply(o2,o3,rotxMat);
-    MatrixMultiply(o3,o4,rotzMat);
+    MatrixMultiply(o3,o4,rotyMat);
+    /*
     float dx=getCos(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
     float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
     float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    */
+
     Vect diff=c-v;
     float dx=getCos(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
     float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
     float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    float x = (4/dz)*dx;
-    float y = (4/dz)*dy;
-    return make_tuple(x*HEIGTH/2,y*HEIGTH/2);
+    float x = (2/dz)*dx;
+    float y = (2/dz)*dy;
+    */
+    
+    return make_tuple(o4.x*HEIGTH/2,o4.y*HEIGTH/2);
 }
 
 void drawFace(SDL_Renderer** renderer,Face &face){
@@ -115,21 +121,21 @@ void drawFace(SDL_Renderer** renderer,Face &face){
     tie(x1,y1) = convert3Dto2D(verticies[face.vert_a]);
     tie(x2,y2) = convert3Dto2D(verticies[face.vert_b]);
     tie(x3,y3) = convert3Dto2D(verticies[face.vert_c]);
-    //if (dot(normals[face.norm_a],angleToVect(cr))>0){return;}
+    if (dot(normals[face.norm_a],angleToVect(cr))>0.0f){return;}
     const vector<SDL_Vertex> verts={
         {
             SDL_FPoint{960+x1,540+y1},
-            SDL_Color{255,255,255,255},
+            SDL_Color{127.0f*(normals[face.norm_a].x+1.0f),127.0f*(normals[face.norm_a].y+1.0f),127.0f*(normals[face.norm_a].z+1.0f),255},
             SDL_FPoint{0}
         },
         {
             SDL_FPoint{960+x2,540+y2},
-            SDL_Color{255,255,0,255},
+            SDL_Color{127.0f*(normals[face.norm_b].x+1.0f),127.0f*(normals[face.norm_b].y+1.0f),127.0f*(normals[face.norm_b].z+1.0f),255},
             SDL_FPoint{0}
         },
         {
             SDL_FPoint{960+x3,540+y3},
-            SDL_Color{255,0,255,255},
+            SDL_Color{127.0f*(normals[face.norm_c].x+1.0f),127.0f*(normals[face.norm_c].y+1.0f),127.0f*(normals[face.norm_c].z+1.0f),255},
             SDL_FPoint{0}
         },
     };
@@ -195,6 +201,12 @@ int main()
                 }
                 else if(SDLK_DOWN == e.key.keysym.sym) {
                     cr.x -= 1;
+                }
+                else if(SDLK_RCTRL == e.key.keysym.sym) {
+                    cr.z += 1;
+                }
+                else if(SDLK_KP_0 == e.key.keysym.sym) {
+                    cr.z -= 1;
                 }
                 else if(SDLK_ESCAPE == e.key.keysym.sym) {
                     running=false;
