@@ -30,7 +30,7 @@ void MatrixMultiply(Vect &i,Vect &o,Matrix4x4 &m){
     if (w!=0){o.x/=w;o.y/=w;o.z/=w;}
 }
 
-Vect cr={-1,-1,-1};
+Vect cr={0,1,0};
 Vect c={2,2,2};
 
 float getCos(int degree) {
@@ -43,6 +43,16 @@ float getSin(int degree) {
 float dot(Vect a, Vect b){
     return a.x*b.x+a.y+b.y+a.z+b.z;
 }
+
+Vect angleToVect(Vect a){
+    // converts 3 angles (filled into a Vector, but not actually a vector) and converts them to a Vector
+    Vect out;
+    out.x=getSin(a.x)*getCos(a.y)*getCos(a.z);
+    out.y=getSin(a.y)*getCos(a.z)*getCos(a.x);
+    out.z=getSin(a.z)*getCos(a.x)*getCos(a.y);
+    return out;
+}
+
 
 void renderTriangle(SDL_Renderer* renderer,vector<SDL_Vertex> v){
     cout << v[0].position.x << " " << v[1].position.y << endl;
@@ -105,7 +115,7 @@ void drawFace(SDL_Renderer** renderer,Face &face){
     tie(x1,y1) = convert3Dto2D(verticies[face.vert_a]);
     tie(x2,y2) = convert3Dto2D(verticies[face.vert_b]);
     tie(x3,y3) = convert3Dto2D(verticies[face.vert_c]);
-    //if (dot(normals[face.norm_a],cr)>0){return;}
+    //if (dot(normals[face.norm_a],angleToVect(cr))>0){return;}
     const vector<SDL_Vertex> verts={
         {
             SDL_FPoint{960+x1,540+y1},
@@ -123,8 +133,8 @@ void drawFace(SDL_Renderer** renderer,Face &face){
             SDL_FPoint{0}
         },
     };
-    //SDL_RenderGeometry(*renderer,nullptr,verts.data(),verts.size(),nullptr,0);
-    renderTriangle(*renderer,verts);
+    SDL_RenderGeometry(*renderer,nullptr,verts.data(),verts.size(),nullptr,0);
+    //renderTriangle(*renderer,verts);
     return;
 }
 
@@ -152,26 +162,26 @@ int main()
                 running = false;
             else if(e.type == SDL_KEYDOWN)
             {
-                if(SDLK_a == e.key.keysym.sym) {
-                    c.x += getCos(cr.x);
-                    c.z += getSin(cr.x);
-                }
-                else if(SDLK_d == e.key.keysym.sym) {
-                    c.x -= getCos(cr.x);
-                    c.z -= getSin(cr.x);
-                }
-                else if(SDLK_w == e.key.keysym.sym) {
-                    c.x += getCos(cr.x);
-                    c.z += getCos(cr.x);
+                if(SDLK_w == e.key.keysym.sym) {
+                    c.x -= getSin(cr.y);
+                    c.z -= getCos(cr.y);
                 }
                 else if(SDLK_s == e.key.keysym.sym) {
-                    c.x -= getCos(cr.x);
-                    c.z -= getCos(cr.x);
+                    c.x += getSin(cr.y);
+                    c.z += getCos(cr.y);
                 }
-                else if(SDLK_LSHIFT == e.key.keysym.sym) {
-                    c.y += 1;
+                else if(SDLK_a == e.key.keysym.sym) {
+                    c.x += getSin(cr.y+90);
+                    c.z += getCos(cr.y+90);
+                }
+                else if(SDLK_d == e.key.keysym.sym) {
+                    c.x += getSin(cr.y-90);
+                    c.z += getCos(cr.y-90);
                 }
                 else if(SDLK_SPACE == e.key.keysym.sym) {
+                    c.y += 1;
+                }
+                else if(SDLK_LSHIFT == e.key.keysym.sym) {
                     c.y -= 1;
                 }
                 else if(SDLK_RIGHT == e.key.keysym.sym) {
