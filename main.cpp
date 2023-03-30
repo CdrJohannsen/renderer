@@ -105,7 +105,7 @@ void drawFace(SDL_Renderer** renderer,Face &face){
     tie(x1,y1) = convert3Dto2D(verticies[face.vert_a]);
     tie(x2,y2) = convert3Dto2D(verticies[face.vert_b]);
     tie(x3,y3) = convert3Dto2D(verticies[face.vert_c]);
-    if (dot(normals[face.norm_a],cr)>0){return;}
+    //if (dot(normals[face.norm_a],cr)>0){return;}
     const vector<SDL_Vertex> verts={
         {
             SDL_FPoint{960+x1,540+y1},
@@ -152,26 +152,26 @@ int main()
                 running = false;
             else if(e.type == SDL_KEYDOWN)
             {
-                if(SDLK_d == e.key.keysym.sym) {
-                    c.x += cr.z;
-                    c.z += -cr.x;
+                if(SDLK_a == e.key.keysym.sym) {
+                    c.x += getCos(cr.x);
+                    c.z += getSin(cr.x);
                 }
-                else if(SDLK_a == e.key.keysym.sym) {
-                    c.x += -cr.z;
-                    c.z += cr.x;
+                else if(SDLK_d == e.key.keysym.sym) {
+                    c.x -= getCos(cr.x);
+                    c.z -= getSin(cr.x);
                 }
                 else if(SDLK_w == e.key.keysym.sym) {
-                    c.x += cr.x;
-                    c.z += cr.z;
+                    c.x += getCos(cr.x);
+                    c.z += getCos(cr.x);
                 }
                 else if(SDLK_s == e.key.keysym.sym) {
-                    c.x -= cr.x;
-                    c.z -= cr.z;
-                }
-                else if(SDLK_SPACE == e.key.keysym.sym) {
-                    c.y += 1;
+                    c.x -= getCos(cr.x);
+                    c.z -= getCos(cr.x);
                 }
                 else if(SDLK_LSHIFT == e.key.keysym.sym) {
+                    c.y += 1;
+                }
+                else if(SDLK_SPACE == e.key.keysym.sym) {
                     c.y -= 1;
                 }
                 else if(SDLK_RIGHT == e.key.keysym.sym) {
