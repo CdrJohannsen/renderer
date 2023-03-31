@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include <tuple>
 #include "vect.cpp"
 #include "face.cpp"
 #include "matr.h"
@@ -21,17 +20,28 @@ using namespace std;
 #define FOVRAD 1.0f/tan(FOV*0.5f/180.0f*M_PI)
 
 
-void MatrixMultiply(Vect &i,Vect &o,Matrix4x4 &m){
-    o.x=i.x*m.m[0][0]+i.y*m.m[1][0]+i.z*m.m[2][0]+m.m[3][0];
-    o.y=i.x*m.m[0][1]+i.y*m.m[1][1]+i.z*m.m[2][1]+m.m[3][1];
-    o.z=i.x*m.m[0][2]+i.y*m.m[1][2]+i.z*m.m[2][2]+m.m[3][2];;
-    float w=i.x*m.m[0][3]+i.y*m.m[1][3]+i.z*m.m[2][3]+m.m[3][3];
+Matrix4x4 MatrixMultiply(Matrix4x4 &m1, Matrix4x4 &m2) {
+    Matrix4x4 matrix;
+    for (int c = 0; c < 4; c++)
+        for (int r = 0; r < 4; r++)
+            matrix.m[r][c] = m1.m[r][0] * m2.m[0][c] + m1.m[r][1] * m2.m[1][c] + m1.m[r][2] * m2.m[2][c] + m1.m[r][3] * m2.m[3][c];
+    return matrix;
+}
 
-    if (w!=0){o.x/=w;o.y/=w;o.z/=w;}
+Matrix4x4 VectorToMatrix(Vect &v) {
+    Matrix4x4 matrix;
+    matrix.m[0][0] = 1.0f;
+    matrix.m[1][1] = 1.0f;
+    matrix.m[2][2] = 1.0f;
+    matrix.m[3][3] = 1.0f;
+    matrix.m[3][0] = v.x;
+    matrix.m[3][1] = v.y;
+    matrix.m[3][2] = v.z;
+    return matrix;
 }
 
 Vect cr={0,0,0};
-Vect c={0,0,0};
+Vect cp={0,0,0};
 
 float getCos(int degree) {
     return cos((M_PI/180)*degree);
@@ -62,8 +72,10 @@ void renderTriangle(SDL_Renderer* renderer,vector<SDL_Vertex> v){
     SDL_RenderDrawLine(renderer,v[2].position.x,v[2].position.y,v[0].position.x,v[0].position.y);
 }
 
-tuple<float,float> convert3Dto2D(Vect v){
+Matrix4x4 convert3Dto2D(Vect v){
     Matrix4x4 projMat;
+    Vect diff=cp-v;
+    Matrix4x4 m = VectorToMatrix(diff);
     projMat.m[0][0]=RATIO/FOVRAD;
     projMat.m[1][1]=FOVRAD;
     projMat.m[2][2]=FAR/(FAR-NEAR);
@@ -95,33 +107,38 @@ tuple<float,float> convert3Dto2D(Vect v){
     Vect o2;
     Vect o3;
     Vect o4;
-    Vect diff=c-v;
-    MatrixMultiply(diff,o1,projMat);
-    MatrixMultiply(o1,o2,rotzMat);
-    MatrixMultiply(o2,o3,rotxMat);
-    MatrixMultiply(o3,o4,rotyMat);
+    Matrix4x4 o = MatrixMultiply(m,projMat);
+    m = MatrixMultiply(o,rotzMat);
+    o = MatrixMultiply(m,rotxMat);
+    m = MatrixMultiply(o,rotyMat);
     /*
-    float dx=getCos(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
-    float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
+       float dx=getCos(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
+       float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
+       float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y-getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
 
-    Vect diff=c-v;
-    float dx=getCos(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
-    float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
-    float x = (2/dz)*dx;
-    float y = (2/dz)*dy;
-    */
-    
-    return make_tuple(o4.x*HEIGTH/2,o4.y*HEIGTH/2);
+       Vect diff=c-v;
+       float dx=getCos(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.y)*diff.z;
+       float dy=getSin(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)+getCos(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
+       float dz=getCos(cr.x)*(getCos(cr.y)*diff.z+getSin(cr.y)*(getSin(cr.z)*diff.y+getCos(cr.z)*diff.x)-getSin(cr.x)*(getCos(cr.z)*diff.y-getSin(cr.z)*diff.x));
+       float x = (2/dz)*dx;
+       float y = (2/dz)*dy;
+       */
+
+    return m;
 }
 
 void drawFace(SDL_Renderer** renderer,Face &face){
-    float x1,y1,x2,y2,x3,y3;
-    tie(x1,y1) = convert3Dto2D(verticies[face.vert_a]);
-    tie(x2,y2) = convert3Dto2D(verticies[face.vert_b]);
-    tie(x3,y3) = convert3Dto2D(verticies[face.vert_c]);
-    if (dot(normals[face.norm_a],angleToVect(cr))>0.0f){return;}
+    Matrix4x4 a = convert3Dto2D(verticies[face.vert_a]);
+    Matrix4x4 b = convert3Dto2D(verticies[face.vert_b]);
+    Matrix4x4 c = convert3Dto2D(verticies[face.vert_c]);
+    float x1 = a.m[3][0]*100;
+    float x2 = b.m[3][0]*100;
+    float x3 = c.m[3][0]*100;
+    float y1 = a.m[3][1]*100;
+    float y2 = b.m[3][1]*100;
+    float y3 = c.m[3][1]*100;
+    Vect to_point(a.m[3][0],a.m[3][1],a.m[3][2]);
+    if (dot(normals[face.norm_a],cp-to_point)>0.0f){return;}
     const vector<SDL_Vertex> verts={
         {
             SDL_FPoint{960+x1,540+y1},
@@ -169,26 +186,26 @@ int main()
             else if(e.type == SDL_KEYDOWN)
             {
                 if(SDLK_w == e.key.keysym.sym) {
-                    c.x -= getSin(cr.y);
-                    c.z -= getCos(cr.y);
+                    cp.x -= getSin(cr.y);
+                    cp.z -= getCos(cr.y);
                 }
                 else if(SDLK_s == e.key.keysym.sym) {
-                    c.x += getSin(cr.y);
-                    c.z += getCos(cr.y);
+                    cp.x += getSin(cr.y);
+                    cp.z += getCos(cr.y);
                 }
                 else if(SDLK_a == e.key.keysym.sym) {
-                    c.x += getSin(cr.y+90);
-                    c.z += getCos(cr.y+90);
+                    cp.x += getSin(cr.y+90);
+                    cp.z += getCos(cr.y+90);
                 }
                 else if(SDLK_d == e.key.keysym.sym) {
-                    c.x += getSin(cr.y-90);
-                    c.z += getCos(cr.y-90);
+                    cp.x += getSin(cr.y-90);
+                    cp.z += getCos(cr.y-90);
                 }
                 else if(SDLK_SPACE == e.key.keysym.sym) {
-                    c.y += 1;
+                    cp.y += 1;
                 }
                 else if(SDLK_LSHIFT == e.key.keysym.sym) {
-                    c.y -= 1;
+                    cp.y -= 1;
                 }
                 else if(SDLK_RIGHT == e.key.keysym.sym) {
                     cr.y += 1;
