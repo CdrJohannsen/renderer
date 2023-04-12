@@ -8,6 +8,7 @@ class Vect {
         float x;
         float y;
         float z;
+        float w = 1;
         Vect operator + (Vect a){return Vect {x+a.x,y+a.y,z+a.z};}
         Vect operator - (Vect a){return Vect {x-a.x,y-a.y,z-a.z};}
         Vect operator - (float a){return Vect {x-a,y-a,z-a};}
@@ -25,6 +26,9 @@ class Vect {
         //Vect(float a[]) {x=a[0];y=a[1];z=a[2];}
         float length() {
             return sqrt(pow(x,2)+pow(y,2)+pow(z,2));
+        }
+        Vect normalized(){
+            return Vect(x,y,z)/this->length();
         }
 };
 

@@ -1,15 +1,16 @@
 CC = g++
 TARGET = main
-LDLIBS=-lSDL2
+OUTPUT = renderer
+LDLIBS=-lSDL2 -lGL -lGLEW
 CFLAGS= -Wall -g
 
-all: $(TARGET)
+all:
 	make clear
-	$(CC) -o $(TARGET) $(TARGET).cpp $(LDLIBS) $(CFLAGS)
+	$(CC) -o $(OUTPUT) $(TARGET).cpp $(LDLIBS) $(CFLAGS)
 
 run:
 	make all
-	./$(TARGET)
+	./$(OUTPUT)
 
 clear:
-	rm $(TARGET)
+	rm -f $(OUTPUT)
