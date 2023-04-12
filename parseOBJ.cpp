@@ -25,7 +25,10 @@ vector<Vect> verticies;
 vector<Face> parse(){
     string line;
     string n;
-    ifstream model ("cube.obj");
+    //ifstream model ("axis.obj");
+    //ifstream model ("triangle.obj");
+    //ifstream model ("cube.obj");
+    ifstream model ("suzanne.obj");
     vector<vector<string>> vert;
     vector<vector<string>> face;
     vector<vector<string>> normal;
