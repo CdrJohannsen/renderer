@@ -20,18 +20,20 @@ vector<string> split(string text,string at){
 }
 
 vector<Vect> normals;
-vector<Vect> verticies;
+vector<Vect> uvs;
+vector<Vert> verticies;
 
 vector<Face> parse(){
     string line;
     string n;
-    //ifstream model ("axis.obj");
-    //ifstream model ("triangle.obj");
-    //ifstream model ("cube.obj");
-    ifstream model ("suzanne.obj");
+    //ifstream model ("ressources/axis.obj");
+    //ifstream model ("ressources/triangle.obj");
+    //ifstream model ("ressources/cube.obj");
+    ifstream model ("ressources/suzanne.obj");
     vector<vector<string>> vert;
     vector<vector<string>> face;
     vector<vector<string>> normal;
+    vector<vector<string>> uv;
     while(!model.eof()){
         getline(model,line);
         if (line.substr(0,2)=="v "){
@@ -42,13 +44,21 @@ vector<Face> parse(){
             line.erase(0,3);
             normal.push_back(split(line," "));
         }
+        else if (line.substr(0,2)=="vt"){
+            line.erase(0,3);
+            uv.push_back(split(line," "));
+        }
         else if (line[0]=='f'){
             line.erase(0,2);
             face.push_back(split(line," "));
         }
     }
+    for (vector<string> i:uv){
+        Vect a = {stof(i[0]),stof(i[1]),0.0f};
+        uvs.push_back(a);
+    }
     for (vector<string> i:vert){
-        Vect a = {stof(i[0]),stof(i[1]),stof(i[2])};
+        Vert a = {stof(i[0]),stof(i[1]),stof(i[2])};
         verticies.push_back(a);
     }
     for (vector<string> i:normal){
@@ -65,6 +75,13 @@ vector<Face> parse(){
         f.vert_a = stoi(face_string[0][0])-1;
         f.vert_b = stoi(face_string[1][0])-1;
         f.vert_c = stoi(face_string[2][0])-1;
+        
+        verticies[f.vert_a].u = uvs[stoi(face_string[0][1])].x;
+        verticies[f.vert_a].v = uvs[stoi(face_string[0][1])].y;
+        verticies[f.vert_b].u = uvs[stoi(face_string[1][1])].x;
+        verticies[f.vert_b].v = uvs[stoi(face_string[1][1])].y;
+        verticies[f.vert_c].u = uvs[stoi(face_string[2][1])].x;
+        verticies[f.vert_c].v = uvs[stoi(face_string[2][1])].y;
         f.norm_a = stoi(face_string[0][2])-1;
         f.norm_b = stoi(face_string[1][2])-1;
         f.norm_c = stoi(face_string[2][2])-1;

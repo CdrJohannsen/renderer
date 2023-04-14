@@ -3,16 +3,26 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #define SDL_MAIN_HANDLED
-#include <GL/gl.h>
-#include <SDL2/SDL_opengl.h>
+//#include <GL/gl.h>
+//#include <SDL2/SDL_opengl.h>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <cmath>
-#include "vect.cpp"
-#include "face.cpp"
+#include "vect.h"
+#include "vert.h"
+#include "face.h"
 #include "matr.h"
-#include "parseOBJ.cpp"
+#include "vertex_buffer.h"
+#include "index_buffer.h"
+#include "parseOBJ.h"
+#include "shader.h"
+#include "camera.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 using namespace std;
 
@@ -24,8 +34,6 @@ using namespace std;
 #define FAR 1000.0f
 #define FOV 90.0f
 #define FOVRAD tan(FOV*0.5f/180.0f*M_PI)
-
-static GLboolean should_rotate = GL_TRUE;
 
 Matrix4x4 MatrixMultiply(Matrix4x4 &m1, Matrix4x4 &m2) {
     Matrix4x4 matrix;
@@ -149,7 +157,7 @@ void drawFace(SDL_Renderer** renderer,Face &face){
     Vect to_point(verticies[face.vert_a].x,verticies[face.vert_a].y,verticies[face.vert_a].z);
     Vect to_point_rel = to_point-cp;
     float diff_dot = dot(normals[face.norm_a].normalized(),to_point_rel.normalized());
-    if (diff_dot>0.0f){return;}
+    if (diff_dot>0.0f){return;} /*
     Matrix4x4 a = convert3Dto2D(verticies[face.vert_a]);
     Matrix4x4 b = convert3Dto2D(verticies[face.vert_b]);
     Matrix4x4 c = convert3Dto2D(verticies[face.vert_c]);
@@ -184,15 +192,87 @@ void drawFace(SDL_Renderer** renderer,Face &face){
         },
     };
     SDL_RenderGeometry(*renderer,nullptr,verts.data(),verts.size(),nullptr,0);
-    //renderTriangle(*renderer,verts);
+    //renderTriangle(*renderer,verts);*/
     return;
 }
-bool handleInput(SDL_Event &e){
+bool buttonW=false;
+bool buttonA=false;
+bool buttonS=false;
+bool buttonD=false;
+bool buttonSHIFT=false;
+bool buttonSPACE=false;
+
+bool handleInput(SDL_Event &e, Camera &camera, float &delta){
     while (SDL_PollEvent(&e)) {
         if(e.type == SDL_QUIT)
             return false;
-        else if(e.type == SDL_KEYDOWN)
-        {
+        else if(e.type == SDL_KEYDOWN){
+            switch(e.key.keysym.sym) {
+                case SDLK_w:
+                buttonW = true;
+                break;
+                case SDLK_s:
+                buttonS = true;
+                break;
+                case SDLK_a:
+                buttonA = true;
+                break;
+                case SDLK_d:
+                buttonD = true;
+                break;
+                case SDLK_SPACE:
+                buttonSPACE = true;
+                break;
+                case SDLK_LSHIFT:
+                buttonSHIFT = true;
+                break;
+                case SDLK_ESCAPE:
+                return false;
+            }
+        }
+        else if(e.type == SDL_KEYUP){
+            switch(e.key.keysym.sym) {
+                case SDLK_w:
+                buttonW = false;
+                break;
+                case SDLK_s:
+                buttonS = false;
+                break;
+                case SDLK_a:
+                buttonA = false;
+                break;
+                case SDLK_d:
+                buttonD = false;
+                break;
+                case SDLK_SPACE:
+                buttonSPACE = false;
+                break;
+                case SDLK_LSHIFT:
+                buttonSHIFT = false;
+                break;
+            }
+        }
+        if(buttonW){
+            camera.translate(glm::vec3(0.0f,0.0f,-4.0*delta));
+        }
+        if(buttonS){
+            camera.translate(glm::vec3(0.0f,0.0f,4.0*delta));
+        }
+        if(buttonA){
+            camera.translate(glm::vec3(-4.0f*delta,0.0f,0.0));
+        }
+        if(buttonD){
+            camera.translate(glm::vec3(4.0f*delta,0.0f,0.0));
+        }
+        if(buttonSPACE){
+            camera.translate(glm::vec3(0.0f,4.0f*delta,0.0));
+        }
+        if(buttonSHIFT){
+            camera.translate(glm::vec3(0.0f,-4.0f*delta,0.0));
+        }
+
+/*
+
             if(SDLK_w == e.key.keysym.sym) {
                 cp.x += getSin(cr.y);
                 cp.z -= getCos(cr.y);
@@ -237,15 +317,20 @@ bool handleInput(SDL_Event &e){
                 return false;
             }
             break;
-        }
+        }*/
     }
     return true;
+}
+void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,GLsizei length, const GLchar* message,const void* userParam){
+    if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM){
+        
+    }
+    cout << "[OpenGL Error] " << message << endl;
 }
 
 int main()
 {
     SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
     SDL_Event e;
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -256,42 +341,141 @@ int main()
     SDL_GL_SetAttribute( SDL_GL_BUFFER_SIZE, 32 );
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-    window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,1920,1080, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
+    SDL_GL_SetSwapInterval(-1);
+
+    #ifdef _DEBUG
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_FLAGS,SDL_GL_CONTEXT_DEBUG_FLAG);
+    #endif
+
+    uint32_t flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE;
+
+    window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,1920,1080, flags);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
     GLenum err = glewInit();
-    if (err != GLEW_OK){
+    if (err != GLEW_OK && err != 4){
         cout << "Error: " << glewGetErrorString(err) << endl;
         cout << err << endl;
         cin.get();
+        //return -1;
     }
 
+    cout << "OpenGL version: " << glGetString(GL_VERSION) << endl;
 
-    //SDL_CreateWindowAndRenderer(1920,1080,SDL_WINDOW_RESIZABLE|SDL_WINDOW_OPENGL,&window, &renderer);
-    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    #ifdef _DEBUG
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(OpenGLDebugCallback,0);
+    #endif
 
-
-    //SDL_SetRenderDrawColor(renderer,255,255,255,255);
+    //SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
     vector<Face> faces=parse();
     bool running=true;
-    glClearColor(0.0f,0.0f,0.0f,1.0f);
-    while(running) {
-        glClear(GL_COLOR_BUFFER_BIT);
-        running = handleInput(e);
-        //SDL_SetRenderDrawColor(renderer,0,0,0,255);
-        SDL_GL_SwapWindow(window);
-        //SDL_RenderClear(renderer);
-        for (Face &face:faces){
-            //drawFace(&renderer,face);
-        }
-
-        //SDL_RenderPresent(renderer);
-        SDL_Delay(10);
-
+    Vert* verts=&verticies[0];
+    int numVerts=verticies.size();
+    int numIndices=0;
+    uint32_t indices[faces.size()*3];
+    for (Face &face: faces){
+        indices[numIndices++]=face.vert_a;
+        indices[numIndices++]=face.vert_b;
+        indices[numIndices++]=face.vert_c;
     }
+
+    IndexBuffer indexBuffer(indices,numIndices,sizeof(indices[0]));
+
+    VertexBuffer vertexBuffer(verts,numVerts);
+    
+    int32_t textureWidth = 0;
+    int32_t textureHeigth = 0;
+    int32_t bitsPerPixel = 0;
+    stbi_set_flip_vertically_on_load(true);
+    auto textureBuffer = stbi_load("ressources/suzanne.png",&textureWidth,&textureHeigth,&bitsPerPixel,4);
+
+    GLuint textureID;
+    glGenTextures(1,&textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    if (textureBuffer) {
+        stbi_image_free(textureBuffer);
+    }
+
+    Shader shader("shaders/basic.vert","shaders/basic.frag");
+    shader.bind();
+
+    uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
+    uint64_t lastCounter = SDL_GetPerformanceCounter();
+    float delta = 0.0f; 
+    float time = 0;
+
+    glm::mat4 model = glm::mat4(1.0f);
+    //model = glm::scale(model,glm::vec3(0.4f));
+
+    Camera camera(90.0f,1920.0f,1080.0f);
+    camera.translate(glm::vec3(0.0f,0.0f,5.0f));
+    camera.update();
+
+    glm::mat4 modelViewProj = model * camera.getViewProj();
+
+    int modelMatrixLocation = glGetUniformLocation(shader.getShaderID(),"u_model");
+    int modelViewProjMatrixLocation = glGetUniformLocation(shader.getShaderID(),"u_modelViewProj");
+
+    int colorUniformLocation = glGetUniformLocation(shader.getShaderID(),"u_color");
+    if (colorUniformLocation != -1){
+        glUniform4f(colorUniformLocation,0.0f,0.0f,1.0f,1.0f);
+    }
+    int textureUniformLocation = glGetUniformLocation(shader.getShaderID(),"u_texture");
+    if (textureUniformLocation != -1){
+        glUniform1i(textureUniformLocation,0);
+    }
+
+    glClearColor(0.1f,0.1f,0.1f,1.0f);
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    while(running) {
+        time += delta;
+        running = handleInput(e,camera,delta);
+        camera.update();
+        glUniform4f(colorUniformLocation,0.0f,sinf(time)*sinf(time),1.0f,1.0f);
+
+        //model=glm::rotate(model,1.0f*delta,glm::vec3(0,1,0));
+
+        glClear(GL_COLOR_BUFFER_BIT);
+        vertexBuffer.bind();
+        indexBuffer.bind();
+        modelViewProj = model * camera.getViewProj();
+
+        glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE,&model[0][0]);
+        glUniformMatrix4fv(modelViewProjMatrixLocation, 1, GL_FALSE,&modelViewProj[0][0]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,textureID);
+
+        glDrawElements(GL_TRIANGLES, numIndices,GL_UNSIGNED_INT,0);
+
+        vertexBuffer.unbind();
+        indexBuffer.unbind();
+        SDL_GL_SwapWindow(window);
+
+        uint64_t endCounter = SDL_GetPerformanceCounter();
+        uint64_t counterElapsed = endCounter-lastCounter;
+        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
+        uint32_t fps = (uint32_t)((float)perfCounterFrequency / (float)counterElapsed);
+        //cout << "FPS: " << fps << endl;
+        lastCounter=endCounter;
+    }
+
+    glDeleteTextures(1,&textureID);
+
     return 0;
 }
