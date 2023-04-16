@@ -28,8 +28,8 @@ vector<Face> parse(){
     string n;
     //ifstream model ("ressources/axis.obj");
     //ifstream model ("ressources/triangle.obj");
-    //ifstream model ("ressources/cube.obj");
-    ifstream model ("ressources/suzanne.obj");
+    ifstream model ("ressources/cube.obj");
+    //ifstream model ("ressources/suzanne.obj");
     vector<vector<string>> vert;
     vector<vector<string>> face;
     vector<vector<string>> normal;

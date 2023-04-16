@@ -1,0 +1,244 @@
+#pragma once
+#include <vector>
+#include <fstream>
+#include <glm/glm.hpp>
+#include "shader.h"
+
+//#define STB_IMAGE_IMPLEMENTATION
+//#include <stb/stb_image.h>
+//#include "vertex_buffer.h"
+//#include "index_buffer.h"
+
+struct ModMaterial {
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    glm::vec3 emissive;
+    float shininess;
+};
+
+struct Material {
+    ModMaterial material;
+    GLuint diffuseMap;
+    GLuint normalMap;
+    GLuint specularMap;
+};
+
+
+class Mesh {
+    public:
+        Mesh(vector<Vert>& vertices, uint64_t numVertices, vector<uint32_t>& indices, uint64_t numIndices, Material material, Shader* shader){
+            this->material = material;
+            this->shader = shader;
+            this->numIndices = numIndices;
+
+            vertexBuffer = new VertexBuffer(vertices.data(),vertices.size()); 
+            indexBuffer = new IndexBuffer(indices.data(),indices.size(),sizeof(indices[0]));
+
+            diffuseLocation = glGetUniformLocation(shader->getShaderID(),"u_material.diffuse");
+            specularLocation = glGetUniformLocation(shader->getShaderID(),"u_material.specular");
+            emissiveLocation = glGetUniformLocation(shader->getShaderID(),"u_material.emissive");
+            shininessLocation = glGetUniformLocation(shader->getShaderID(),"u_material.shininess");
+            diffuseMapLocation = glGetUniformLocation(shader->getShaderID(),"u_diffuse_map");
+            normalMapLocation = glGetUniformLocation(shader->getShaderID(),"u_normal_map");
+            specularMapLocation = glGetUniformLocation(shader->getShaderID(),"u_specular_map");
+        }
+
+        ~Mesh(){
+            delete vertexBuffer;
+            delete indexBuffer;
+        }
+
+        inline void render(){
+            vertexBuffer->bind();
+            indexBuffer->bind();
+            glUniform3fv(diffuseLocation,1,(float*)&material.material.diffuse);
+            glUniform3fv(specularLocation,1,(float*)&material.material.specular);
+            glUniform3fv(emissiveLocation,1,(float*)&material.material.emissive);
+            glUniform1f(shininessLocation,material.material.shininess);
+
+            glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+            glUniform1i(diffuseMapLocation,0);
+            glActiveTexture(GL_TEXTURE1);
+
+            glBindTexture(GL_TEXTURE_2D, material.normalMap);
+            glActiveTexture(GL_TEXTURE2);
+            glUniform1i(normalMapLocation,1);
+            
+            glBindTexture(GL_TEXTURE_2D, material.specularMap);
+            glActiveTexture(GL_TEXTURE0);
+            glUniform1i(specularMapLocation,2);
+            
+            glDrawElements(GL_TRIANGLES, numIndices,GL_UNSIGNED_INT,0);
+        }
+    private:
+        VertexBuffer* vertexBuffer;
+        IndexBuffer* indexBuffer;
+        Shader* shader;
+        Material material;
+        uint64_t numIndices = 0;
+        int diffuseLocation;
+        int specularLocation;
+        int emissiveLocation;
+        int shininessLocation;
+        int diffuseMapLocation;
+        int normalMapLocation;
+        int specularMapLocation;
+};
+
+class Model {
+    public:
+
+        void init(char* filename, Shader* shader){
+            uint64_t numMeshes = 0;
+            uint64_t numMaterials = 0;
+
+            ifstream input = ifstream(filename,ios::in | ios::binary);
+            if (!input.is_open()){
+                cout << "Could not read model" << endl;
+                return;
+            }
+
+            // Materials
+            input.read((char*)&numMaterials, sizeof(uint64_t));
+            for (uint64_t i = 0; i < numMaterials; i++){
+                Material material = {};
+                input.read((char*)&material, sizeof(ModMaterial));
+
+                uint64_t diffuseMapNameLength = 0;
+                input.read((char*)&diffuseMapNameLength, sizeof(uint64_t));
+                std::string diffuseMapName(diffuseMapNameLength, '\0');
+                input.read((char*)&diffuseMapName[0], diffuseMapNameLength);
+
+                uint64_t normalMapNameLength = 0;
+                input.read((char*)&normalMapNameLength, sizeof(uint64_t));
+                std::string normalMapName(normalMapNameLength, '\0');
+                input.read((char*)&normalMapName[0], normalMapNameLength);
+
+                uint64_t specularMapNameLength = 0;
+                input.read((char*)&specularMapNameLength, sizeof(uint64_t));
+                std::string specularMapName(specularMapNameLength, '\0');
+                input.read((char*)&specularMapName[0], specularMapNameLength);
+
+                if (diffuseMapNameLength <= 0 || normalMapNameLength <= 0 || specularMapNameLength <= 0){
+                    cout << "Could not get map";
+                }
+                int32_t textureWidth = 0;
+                int32_t textureHeigth = 0;
+                int32_t bitsPerPixel = 0;
+                glGenTextures(3, &material.diffuseMap);
+                stbi_set_flip_vertically_on_load(true);
+                {
+                    auto textureBuffer = stbi_load(diffuseMapName.c_str(),&textureWidth,&textureHeigth,&bitsPerPixel,4);
+                    // assert(textureBuffer);
+                    // assert(material.diffuseMap);
+
+                    if (textureBuffer){
+                        glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+                        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
+
+                        stbi_image_free(textureBuffer);
+                    }
+                }
+
+                {
+                    auto textureBuffer = stbi_load(normalMapName.c_str(),&textureWidth,&textureHeigth,&bitsPerPixel,4);
+                    //assert(textureBuffer);
+                    //assert(material.normalMap);
+
+                    if (textureBuffer){
+                        glBindTexture(GL_TEXTURE_2D, material.normalMap);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+                        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
+
+                        stbi_image_free(textureBuffer);
+                    }
+                }
+
+                {
+                    auto textureBuffer = stbi_load(specularMapName.c_str(),&textureWidth,&textureHeigth,&bitsPerPixel,4);
+                    //assert(textureBuffer);
+                    //assert(material.specularMap);
+
+                    if (textureBuffer) {
+                        glBindTexture(GL_TEXTURE_2D, material.specularMap);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+                        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
+
+                        stbi_image_free(textureBuffer);
+                    }
+                }
+                glBindTexture(GL_TEXTURE_2D, 0);
+                materials.push_back(material);
+            }
+
+            // Meshes
+            input.read((char*)&numMeshes, sizeof(uint64_t));
+
+            for (uint64_t i = 0; i < numMeshes; i++){
+                Material material;
+                vector<Vert> vertices;
+                uint64_t numVerts = 0;
+
+                vector<uint32_t> indices;
+                uint64_t numIndices = 0;
+
+                uint64_t materialIndex = 0;
+
+
+                input.read((char*)&materialIndex, sizeof(uint64_t));
+                input.read((char*)&numVerts, sizeof(uint64_t));
+                input.read((char*)&numIndices, sizeof(uint64_t));
+
+                for (uint64_t i = 0; i < numVerts; i++){
+                    Vert vertex;
+                    input.read((char*)&vertex.position.x,sizeof(float));
+                    input.read((char*)&vertex.position.y,sizeof(float));
+                    input.read((char*)&vertex.position.z,sizeof(float));
+                    input.read((char*)&vertex.normal.x,sizeof(float));
+                    input.read((char*)&vertex.normal.y,sizeof(float));
+                    input.read((char*)&vertex.normal.z,sizeof(float));
+                    input.read((char*)&vertex.tangent.x,sizeof(float));
+                    input.read((char*)&vertex.tangent.y,sizeof(float));
+                    input.read((char*)&vertex.tangent.z,sizeof(float));
+                    input.read((char*)&vertex.texCoord.x,sizeof(float));
+                    input.read((char*)&vertex.texCoord.y,sizeof(float));
+                    vertices.push_back(vertex);
+                }
+                for (uint64_t i = 0; i < numIndices; i++){
+                    uint32_t index;
+                    input.read((char*)&index,sizeof(uint32_t));
+                    indices.push_back(index);
+                }
+                Mesh* mesh = new Mesh(vertices, numVerts, indices, numIndices, materials[materialIndex], shader);
+                meshes.push_back(mesh);
+            }
+        }
+
+        void render(){
+            for(Mesh* mesh: meshes){
+                mesh->render();
+            }
+        }
+
+        ~Model(){
+            for(Mesh* mesh: meshes){
+                delete mesh;
+            }
+        }
+    private:
+        vector<Mesh*> meshes;
+        vector<Material> materials;
+};
