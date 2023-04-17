@@ -191,7 +191,7 @@ int main (int argc, char** argv) {
 
     string filename = string(getFilename(argv[argc-1]));
     string filenameNoExt = filename.substr(0,filename.find_last_of('.'));
-    string outputFilename = filenameNoExt + ".mod";
+    string outputFilename = "../ressources/" + filenameNoExt + ".mod";
 
     ofstream output(outputFilename,ios::out | ios::binary);
     cout << "Writing mod file..." << endl;
