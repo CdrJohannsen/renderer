@@ -83,14 +83,14 @@ void main()
     vec3 reflection = reflect(u_dir_light.direction, normal);
     vec3 ambient = u_dir_light.ambient * diffuseColor.xyz;
     vec3 diffuse = u_dir_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-    vec3 specular = u_dir_light.specular * pow(max(dot(reflection, view), 0.1), shininess/21.0f) * u_material.specular;
+    vec3 specular = u_dir_light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
 
-    //diffuse = vec3(0.0f);
-    //specular = vec3(0.0f);
-    //shininess = 0.0f;
+    diffuse = vec3(0.0f);
+    specular = vec3(0.0f);
+    shininess = 0.0f;
     //ambient = -u_dir_light.direction;
     //ambient = vec3(0.0f);
-    //ambient = normal;
+    ambient = normal;
 
     light = normalize(u_point_light.position - v_position);
     reflection = reflect(-light, normal);
