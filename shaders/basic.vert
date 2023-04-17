@@ -21,8 +21,8 @@ void main()
     vec3 t = normalize(mat3(u_invModelView) * a_tangent);
     vec3 n = normalize(mat3(u_invModelView) * a_normal);
     t = normalize(t - dot(t,n)*n);
-    vec3 b = normalize(mat3(u_invModelView) * cross(n ,t));
-    mat3 tbn = transpose(mat3(t, b, a_normal));
+    vec3 b = normalize(mat3(u_invModelView) * cross(n,t));
+    mat3 tbn = transpose(mat3(t, b, n));
     //mat3 tbn = mat3(t,b,n);
     v_tbn = tbn;
 
