@@ -8,6 +8,7 @@ layout(location = 3) in vec2 a_texCoord;
 out vec3 v_position;
 out vec2 v_texCoord;
 out mat3 v_tbn;
+out vec3 v_normal;
 
 uniform mat4 u_modelViewProj;
 uniform mat4 u_modelView;
@@ -21,9 +22,11 @@ void main()
     vec3 n = normalize(mat3(u_invModelView) * a_normal);
     t = normalize(t - dot(t,n)*n);
     vec3 b = normalize(mat3(u_invModelView) * cross(n ,t));
-    //mat3 tbn = transpose(mat3(t, b, n));
-    mat3 tbn = mat3(t,b,n);
+    mat3 tbn = transpose(mat3(t, b, a_normal));
+    //mat3 tbn = mat3(t,b,n);
     v_tbn = tbn;
+
+    v_normal = n;
 
     v_position = vec3(u_modelView * vec4(a_position, 1.0f));
     v_texCoord = a_texCoord;
