@@ -246,7 +246,7 @@ int main()
 
 
     Model modelTree;
-    modelTree.init("ressources/fern.mod",&shader);
+    modelTree.init("ressources/rings.mod",&shader);
     
     uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
     uint64_t lastCounter = SDL_GetPerformanceCounter();

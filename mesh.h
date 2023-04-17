@@ -14,6 +14,9 @@ struct ModMaterial {
     glm::vec3 specular;
     glm::vec3 emissive;
     float shininess;
+    bool hasDiffuse = false;
+    bool hasNormal = false;
+    bool hasSpecular = false;
 };
 
 struct Material {
@@ -41,6 +44,8 @@ class Mesh {
             diffuseMapLocation = glGetUniformLocation(shader->getShaderID(),"u_diffuse_map");
             normalMapLocation = glGetUniformLocation(shader->getShaderID(),"u_normal_map");
             specularMapLocation = glGetUniformLocation(shader->getShaderID(),"u_specular_map");
+            hasDiffuseLocation = glGetUniformLocation(shader->getShaderID(),"u_material.hasDiffuse");
+            hasSpecularLocation = glGetUniformLocation(shader->getShaderID(),"u_material.hasSpecular");
         }
 
         ~Mesh(){
@@ -56,18 +61,22 @@ class Mesh {
             glUniform3fv(emissiveLocation,1,(float*)&material.material.emissive);
             glUniform1f(shininessLocation,material.material.shininess);
 
+            glUniform1i(hasDiffuseLocation,material.material.hasDiffuse);
+            glUniform1i(hasSpecularLocation,material.material.hasSpecular);
+
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
             glUniform1i(diffuseMapLocation,0);
-            glActiveTexture(GL_TEXTURE1);
 
+            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, material.normalMap);
-            glActiveTexture(GL_TEXTURE2);
             glUniform1i(normalMapLocation,1);
-            
+
+            glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, material.specularMap);
-            glActiveTexture(GL_TEXTURE0);
             glUniform1i(specularMapLocation,2);
-            
+
+            glActiveTexture(GL_TEXTURE0);
             glDrawElements(GL_TRIANGLES, numIndices,GL_UNSIGNED_INT,0);
         }
     private:
@@ -83,6 +92,8 @@ class Mesh {
         int diffuseMapLocation;
         int normalMapLocation;
         int specularMapLocation;
+        int hasDiffuseLocation;
+        int hasSpecularLocation;
 };
 
 class Model {
@@ -119,15 +130,12 @@ class Model {
                 std::string specularMapName(specularMapNameLength, '\0');
                 input.read((char*)&specularMapName[0], specularMapNameLength);
 
-                if (diffuseMapNameLength <= 0 || normalMapNameLength <= 0 || specularMapNameLength <= 0){
-                    cout << "Could not get map";
-                }
                 int32_t textureWidth = 0;
                 int32_t textureHeigth = 0;
                 int32_t bitsPerPixel = 0;
                 glGenTextures(3, &material.diffuseMap);
                 stbi_set_flip_vertically_on_load(true);
-                {
+                if(material.material.hasDiffuse){
                     auto textureBuffer = stbi_load(diffuseMapName.c_str(),&textureWidth,&textureHeigth,&bitsPerPixel,4);
                     // assert(textureBuffer);
                     // assert(material.diffuseMap);
@@ -145,7 +153,7 @@ class Model {
                     }
                 }
 
-                {
+                if(material.material.hasNormal){
                     auto textureBuffer = stbi_load(normalMapName.c_str(),&textureWidth,&textureHeigth,&bitsPerPixel,4);
                     //assert(textureBuffer);
                     //assert(material.normalMap);
@@ -163,7 +171,7 @@ class Model {
                     }
                 }
 
-                {
+                if(material.material.hasSpecular){
                     auto textureBuffer = stbi_load(specularMapName.c_str(),&textureWidth,&textureHeigth,&bitsPerPixel,4);
                     //assert(textureBuffer);
                     //assert(material.specularMap);
