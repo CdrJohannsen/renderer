@@ -26,8 +26,7 @@ void main()
     //mat3 tbn = mat3(t,b,n);
     v_tbn = tbn;
 
-    v_normal = n;
-
+    v_normal = mat3(u_invModelView) * a_normal ;
     v_position = vec3(u_modelView * vec4(a_position, 1.0f));
     v_texCoord = a_texCoord;
 }
