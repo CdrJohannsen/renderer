@@ -21,6 +21,9 @@ struct Material {
     Position specular;
     Position emissive;
     float shininess;
+    bool hasDiffuse = false;
+    bool hasNormal = false;
+    bool hasSpecular = false;
     aiString diffuseMapName;
     aiString normalMapName;
     aiString specularMapName;
@@ -31,6 +34,9 @@ struct ModMaterial {
     Position specular;
     Position emissive;
     float shininess;
+    bool hasDiffuse = false;
+    bool hasNormal = false;
+    bool hasSpecular = false;
 };
 
 struct Mesh {
@@ -60,18 +66,20 @@ void processMesh(aiMesh* mesh,const aiScene* scene){
         normal.z = mesh->mNormals[i].z;
         m.normals.push_back(normal);
 
-        Position tangent;
-        tangent.x = mesh->mTangents[i].x;
-        tangent.y = mesh->mTangents[i].y;
-        tangent.z = mesh->mTangents[i].z;
-        m.tangents.push_back(tangent);
-
         Position2D texCoord;
+        Position tangent;
         if (*mesh->mNumUVComponents > 0){
             texCoord.x = mesh->mTextureCoords[0][i].x;
             texCoord.y = mesh->mTextureCoords[0][i].y;
+
+            tangent.x = mesh->mTangents[i].x;
+            tangent.y = mesh->mTangents[i].y;
+            tangent.z = mesh->mTangents[i].z;
+
         }
         m.texCoord.push_back(texCoord);
+        m.tangents.push_back(tangent);
+
     }
     for (unsigned int i = 0; i < mesh->mNumFaces;i++){
         aiFace face = mesh->mFaces[i];
@@ -144,9 +152,18 @@ void processMaterials(const aiScene* scene){
         uint32_t numDiffuseMaps = material->GetTextureCount(aiTextureType_DIFFUSE);
         uint32_t numNormalMaps = material->GetTextureCount(aiTextureType_NORMALS);
         uint32_t numSpecularMaps = material->GetTextureCount(aiTextureType_SPECULAR);
-        if (numDiffuseMaps > 0) {material->GetTexture(aiTextureType_DIFFUSE, 0, &mat.diffuseMapName);}
-        if (numNormalMaps > 0) {material->GetTexture(aiTextureType_NORMALS, 0, &mat.normalMapName);}
-        if (numSpecularMaps > 0) {material->GetTexture(aiTextureType_SPECULAR, 0, &mat.specularMapName);}
+        if (numDiffuseMaps > 0) {
+            material->GetTexture(aiTextureType_DIFFUSE, 0, &mat.diffuseMapName);
+            mat.hasDiffuse = true;
+        }
+        if (numNormalMaps > 0) {
+            material->GetTexture(aiTextureType_NORMALS, 0, &mat.normalMapName);
+            mat.hasNormal = true;
+        }
+        if (numSpecularMaps > 0) {
+            material->GetTexture(aiTextureType_SPECULAR, 0, &mat.specularMapName);
+            mat.hasSpecular = true;
+        }
 
         materials.push_back(mat);
     }

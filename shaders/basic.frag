@@ -11,6 +11,8 @@ struct Material {
     vec3 specular;
     vec3 emissive;
     float shininess;
+    bool hasDiffuse;
+    bool hasSpecular;
 };
 
 struct DirectionalLight {
@@ -59,19 +61,22 @@ void main()
     vec3 normal = texture(u_normal_map, v_texCoord).rgb;
     normal = normalize(normal * 2.0f - 1.0f);
     normal = normalize(v_tbn * normal);
-    
-    vec4 diffuseMapColor = texture(u_diffuse_map, v_texCoord);
-    if (diffuseMapColor.w < 0.9){
-        discard;
-    }
+
     vec4 diffuseColor;
     float shininess;
-    if (diffuseMapColor != vec4(0.0,0.0,0.0,1.0)) {
-        diffuseColor = diffuseMapColor;
-        shininess = texture(u_specular_map,v_texCoord).r;
+    if (u_material.hasDiffuse) {
+        diffuseColor = texture(u_diffuse_map, v_texCoord);;
     } else {
         diffuseColor = vec4(u_material.diffuse,1.0f);
+    }
+    if (u_material.hasSpecular) {
+        shininess = texture(u_specular_map,v_texCoord).r;
+    } else {
         shininess = u_material.shininess;
+    }
+
+    if (diffuseColor.w < 0.9){
+        discard;
     }
 
     vec3 light = normalize(-u_dir_light.direction);
