@@ -5,6 +5,7 @@ layout(location = 0) out vec4 f_color;
 in vec3 v_position;
 in vec2 v_texCoord;
 in mat3 v_tbn;
+in vec3 v_normal;
 
 struct Material {
     vec3 diffuse;
@@ -90,7 +91,7 @@ void main()
     shininess = 0.0f;
     //ambient = -u_dir_light.direction;
     //ambient = vec3(0.0f);
-    ambient = normal;
+    ambient = vec3(1.0) * dot(normal, light); // Muss immer gleich aussehen
 
     light = normalize(u_point_light.position - v_position);
     reflection = reflect(-light, normal);
