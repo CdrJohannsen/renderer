@@ -13,6 +13,7 @@ struct Material {
     vec3 emissive;
     float shininess;
     bool hasDiffuse;
+    bool hasNormal;
     bool hasSpecular;
 };
 
@@ -59,17 +60,25 @@ void main()
     // Vector from fragment to camera (camera always at 0,0,0)
     vec3 view = normalize(-v_position);
 
-    vec3 normal = texture(u_normal_map, v_texCoord).rgb;
-    normal = normalize(normal * 2.0f - 1.0f);
-    normal = normalize(v_tbn * normal);
+    vec3 normal;
+
+    if (u_material.hasNormal) {
+        normal = texture(u_normal_map, v_texCoord).rgb;
+        normal = normalize(normal * 2.0f - 1.0f);
+        normal = normalize(v_tbn * normal);
+    } else {
+        normal = v_normal;
+        normal = vec3(1.0f);
+    }
 
     vec4 diffuseColor;
-    float shininess;
     if (u_material.hasDiffuse) {
         diffuseColor = texture(u_diffuse_map, v_texCoord);;
     } else {
         diffuseColor = vec4(u_material.diffuse,1.0f);
     }
+
+    float shininess;
     if (u_material.hasSpecular) {
         shininess = texture(u_specular_map,v_texCoord).r;
     } else {
@@ -86,20 +95,14 @@ void main()
     vec3 diffuse = u_dir_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
     vec3 specular = u_dir_light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
 
-    diffuse = vec3(0.0f);
-    specular = vec3(0.0f);
-    shininess = 0.0f;
-    //ambient = -u_dir_light.direction;
-    //ambient = vec3(0.0f);
-    ambient = vec3(1.0) * dot(normal, light); // Muss immer gleich aussehen
 
     light = normalize(u_point_light.position - v_position);
     reflection = reflect(-light, normal);
     float distance_light = length(-u_point_light.position - v_position);
     float attentuation = 1.0f / ((1.0f) + (u_point_light.linear * distance_light) + (u_point_light.quadratic * distance_light));
-    //ambient += attentuation * u_point_light.ambient * diffuseColor.xyz;
-    //diffuse += attentuation * u_point_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-    //specular += attentuation * u_point_light.specular * pow(max(dot(reflection, view), 0.00001), shininess/21.0f) * u_material.specular;
+    ambient += attentuation * u_point_light.ambient * diffuseColor.xyz;
+    diffuse += attentuation * u_point_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
+    specular += attentuation * u_point_light.specular * pow(max(dot(reflection, view), 0.00001), shininess/21.0f) * u_material.specular;
 
     light = normalize(u_spot_light.position - v_position);
     reflection = reflect(-light, normal);
@@ -107,12 +110,16 @@ void main()
     float epsilon = u_spot_light.innerCone - u_spot_light.outerCone;
     float intensity = clamp((theta - u_spot_light.outerCone) / epsilon, 0.0f, 1.0f);
     if (theta > u_spot_light.outerCone){
-        //diffuse += intensity * u_spot_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-        //specular += intensity * u_spot_light.specular * pow(max(dot(reflection, view), 0.00001), shininess/21.0f) * u_material.specular;
-        //ambient += u_spot_light.ambient * diffuseColor.xyz;
+        diffuse += intensity * u_spot_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
+        specular += intensity * u_spot_light.specular * pow(max(dot(reflection, view), 0.1), shininess/21.0f) * u_material.specular;
+        ambient += u_spot_light.ambient * diffuseColor.xyz;
     } else {
-        //ambient += u_spot_light.ambient * diffuseColor.xyz;
+        ambient += u_spot_light.ambient * diffuseColor.xyz;
     }
 
+    //ambient = vec3(1.0);
+    //diffuse = vec3(0.0);
+    //specular = u_dir_light.specular;
+    //ambient = vec3(pow(max(dot(reflection, view),0.1),3.0f)) * u_material.specular * u_spot_light.specular * intensity;
     f_color = vec4(ambient + diffuse + specular + u_material.emissive, 1.0f);
 }

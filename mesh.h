@@ -45,6 +45,7 @@ class Mesh {
             normalMapLocation = glGetUniformLocation(shader->getShaderID(),"u_normal_map");
             specularMapLocation = glGetUniformLocation(shader->getShaderID(),"u_specular_map");
             hasDiffuseLocation = glGetUniformLocation(shader->getShaderID(),"u_material.hasDiffuse");
+            hasNormalLocation = glGetUniformLocation(shader->getShaderID(),"u_material.hasNormal");
             hasSpecularLocation = glGetUniformLocation(shader->getShaderID(),"u_material.hasSpecular");
         }
 
@@ -62,6 +63,7 @@ class Mesh {
             glUniform1f(shininessLocation,material.material.shininess);
 
             glUniform1i(hasDiffuseLocation,material.material.hasDiffuse);
+            glUniform1i(hasNormalLocation,material.material.hasNormal);
             glUniform1i(hasSpecularLocation,material.material.hasSpecular);
 
             glActiveTexture(GL_TEXTURE0);
@@ -93,6 +95,7 @@ class Mesh {
         int normalMapLocation;
         int specularMapLocation;
         int hasDiffuseLocation;
+        int hasNormalLocation;
         int hasSpecularLocation;
 };
 

@@ -211,7 +211,7 @@ int main()
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
     int dirDirectionLocation = glGetUniformLocation(shader.getShaderID(),"u_dir_light.direction");
-    glm::vec3 sunColor(1.0f);
+    glm::vec3 sunColor(0.0f);
     glm::vec4 sunDirection(0.0f, -1.0f, 0.0f, 1.0f);
     glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.diffuse"), 1, (float*)&sunColor);
     glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.specular"), 1, (float*)&sunColor);
@@ -239,7 +239,7 @@ int main()
     glUniform1f(glGetUniformLocation(shader.getShaderID(), "u_spot_light.outerCone"), 0.995f);
     glUniform1f(glGetUniformLocation(shader.getShaderID(), "u_spot_light.innerCone"), 0.996f);
 
-    glm::vec4 spotLightPosition(0.0f,80.0f,0.0f,1.0f);
+    glm::vec4 spotLightPosition(0.0f,10.0f,0.0f,1.0f);
     int spotPositionLocation = glGetUniformLocation(shader.getShaderID(), "u_spot_light.position");
     glm::vec4 spotLightDirection(0.0f,1.0f,0.0f,1.0f);
     int spotDirectionLocation = glGetUniformLocation(shader.getShaderID(), "u_spot_light.direction");
@@ -306,7 +306,6 @@ int main()
         glUniformMatrix4fv(modelViewProjMatrixLocation, 1, GL_FALSE,&modelViewProj[0][0]);
         glActiveTexture(GL_TEXTURE0);
 
-        //glDrawElements(GL_TRIANGLES, numIndices,GL_UNSIGNED_INT,0);
         modelTree.render();
 
         SDL_GL_SwapWindow(window);
