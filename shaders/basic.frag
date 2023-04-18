@@ -63,12 +63,14 @@ void main()
     vec3 normal;
 
     if (u_material.hasNormal) {
-        normal = texture(u_normal_map, v_texCoord).rgb;
-        normal = normalize(normal * 2.0f - 1.0f);
-        normal = normalize(v_tbn * normal);
+        vec3 normal_t = texture(u_normal_map, v_texCoord).rgb;
+        normal_t = normalize(normal_t * 2.0f - 1.0f);
+        normal = normalize(v_tbn * normal_t);
+        normal.x = normalize(normal_t.x + v_normal.x * dot(v_normal.xy,normal_t.xy));
+        normal.y = normalize(normal_t.y + v_normal.y * dot(v_normal.yz,normal_t.yz));
+        normal.z = normalize(normal_t.z + v_normal.z * dot(v_normal.zx,normal_t.zx));
     } else {
         normal = v_normal;
-        normal = vec3(1.0f);
     }
 
     vec4 diffuseColor;
@@ -117,9 +119,6 @@ void main()
         ambient += u_spot_light.ambient * diffuseColor.xyz;
     }
 
-    //ambient = vec3(1.0);
-    //diffuse = vec3(0.0);
-    //specular = u_dir_light.specular;
-    //ambient = vec3(pow(max(dot(reflection, view),0.1),3.0f)) * u_material.specular * u_spot_light.specular * intensity;
     f_color = vec4(ambient + diffuse + specular + u_material.emissive, 1.0f);
+    f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
 }

@@ -211,7 +211,7 @@ int main()
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
     int dirDirectionLocation = glGetUniformLocation(shader.getShaderID(),"u_dir_light.direction");
-    glm::vec3 sunColor(0.0f);
+    glm::vec3 sunColor(1.0f, 1.0f,1.0f);
     glm::vec4 sunDirection(0.0f, -1.0f, 0.0f, 1.0f);
     glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.diffuse"), 1, (float*)&sunColor);
     glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.specular"), 1, (float*)&sunColor);
@@ -230,7 +230,7 @@ int main()
 
     int pointPositionLocation = glGetUniformLocation(shader.getShaderID(), "u_point_light.position");
 
-    glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
+    glm::vec3 spotLightColor(0.0f, 0.0f, 0.0f);
     glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_spot_light.diffuse"), 1, (float*)&spotLightColor);
     glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_spot_light.specular"), 1, (float*)&spotLightColor);
     spotLightColor *= 0.1f;
@@ -246,7 +246,7 @@ int main()
 
 
     Model modelTree;
-    modelTree.init("ressources/blobs.mod",&shader);
+    modelTree.init("ressources/fern.mod",&shader);
     
     uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
     uint64_t lastCounter = SDL_GetPerformanceCounter();
