@@ -66,9 +66,7 @@ void main()
         vec3 normal_t = texture(u_normal_map, v_texCoord).rgb;
         normal_t = normalize(normal_t * 2.0f - 1.0f);
         normal = normalize(v_tbn * normal_t);
-        normal.x = normalize(normal_t.x + v_normal.x * dot(v_normal.xy,normal_t.xy));
-        normal.y = normalize(normal_t.y + v_normal.y * dot(v_normal.yz,normal_t.yz));
-        normal.z = normalize(normal_t.z + v_normal.z * dot(v_normal.zx,normal_t.zx));
+        normal = normalize(v_tbn * normal_t);
     } else {
         normal = v_normal;
     }
