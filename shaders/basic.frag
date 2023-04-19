@@ -104,7 +104,7 @@ void main()
 
     light = normalize(u_spot_light.position - v_position);
     reflection = reflect(-light, normal);
-    float theta = dot(light, u_spot_light.direction);
+    float theta = dot(light, normalize(u_spot_light.direction));
     float epsilon = u_spot_light.innerCone - u_spot_light.outerCone;
     float intensity = clamp((theta - u_spot_light.outerCone) / epsilon, 0.0f, 1.0f);
     if (theta > u_spot_light.outerCone){

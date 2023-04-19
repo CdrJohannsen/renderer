@@ -3,7 +3,7 @@ TARGETS = main.cpp shader.cpp
 OUTPUT = renderer
 LDLIBS=-lSDL2 -lGL -lGLEW
 CFLAGS= -Wall -g
-TEST_MODEL= ./ressources/fern.mod
+TEST_MODEL= ./ressources/rings.mod
 
 all:
 	make clear
