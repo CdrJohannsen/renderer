@@ -3,13 +3,14 @@ TARGETS = main.cpp shader.cpp
 OUTPUT = renderer
 LDLIBS=-lSDL2 -lGL -lGLEW
 CFLAGS= -Wall -g
+TEST_MODEL= ./ressources/fern.mod
 
 all:
 	make clear
 	$(CC) -o $(OUTPUT) $(TARGETS) $(LDLIBS) $(CFLAGS)
 
 run:
-	./$(OUTPUT)
+	./$(OUTPUT) $(TEST_MODEL)
 
 clear:
 	rm -f $(OUTPUT)

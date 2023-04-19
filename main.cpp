@@ -156,8 +156,11 @@ void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     cout << "[OpenGL Error] " << message << endl;
 }
 
-int main()
+int main(int argc,char** argv)
 {
+    if (argc <= 1){
+        cout << "Usage" << argv[0] << " [FILE]" << endl;
+    }
     SDL_Window* window = nullptr;
     SDL_Event e;
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -252,7 +255,7 @@ int main()
     font.initFont("ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
 
     Model modelTree;
-    modelTree.init("ressources/fern.mod",&shader);
+    modelTree.init(argv[1],&shader);
 
     uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
     uint64_t lastCounter = SDL_GetPerformanceCounter();

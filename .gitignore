@@ -1,2 +1,5 @@
 # Vim stuff
 *.swp
+
+# too large model
+cube_floor.mod
