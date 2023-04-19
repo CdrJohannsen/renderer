@@ -61,14 +61,13 @@ void main()
     vec3 view = normalize(-v_position);
 
     vec3 normal;
-
     if (u_material.hasNormal) {
         vec3 normal_t = texture(u_normal_map, v_texCoord).rgb;
         normal_t = normalize(normal_t * 2.0f - 1.0f);
         normal = normalize(v_tbn * normal_t);
-        normal = normalize(v_tbn * normal_t);
     } else {
         normal = v_normal;
+        //normal = vec3(1.0f);
     }
 
     vec4 diffuseColor;
@@ -95,14 +94,13 @@ void main()
     vec3 diffuse = u_dir_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
     vec3 specular = u_dir_light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
 
-
     light = normalize(u_point_light.position - v_position);
     reflection = reflect(-light, normal);
     float distance_light = length(-u_point_light.position - v_position);
     float attentuation = 1.0f / ((1.0f) + (u_point_light.linear * distance_light) + (u_point_light.quadratic * distance_light));
     ambient += attentuation * u_point_light.ambient * diffuseColor.xyz;
     diffuse += attentuation * u_point_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-    specular += attentuation * u_point_light.specular * pow(max(dot(reflection, view), 0.00001), shininess/21.0f) * u_material.specular;
+    specular += attentuation * u_point_light.specular * pow(max(dot(reflection, view), 0.00001), shininess/1.0f) * u_material.specular;
 
     light = normalize(u_spot_light.position - v_position);
     reflection = reflect(-light, normal);
@@ -111,12 +109,12 @@ void main()
     float intensity = clamp((theta - u_spot_light.outerCone) / epsilon, 0.0f, 1.0f);
     if (theta > u_spot_light.outerCone){
         diffuse += intensity * u_spot_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-        specular += intensity * u_spot_light.specular * pow(max(dot(reflection, view), 0.1), shininess/21.0f) * u_material.specular;
+        specular += intensity * u_spot_light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
         ambient += u_spot_light.ambient * diffuseColor.xyz;
     } else {
         ambient += u_spot_light.ambient * diffuseColor.xyz;
     }
 
     f_color = vec4(ambient + diffuse + specular + u_material.emissive, 1.0f);
-    f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
+    //f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
 }
