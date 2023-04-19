@@ -30,7 +30,15 @@ class Camera {
             position += v;
             view = glm::translate(view,v*-1.0f);
         }
-
+        string getPositionString(){
+            string a = "x: ";
+            a.append(to_string(position.x));
+            a.append(" y: ");
+            a.append(to_string(position.y));
+            a.append(" z: ");
+            a.append(to_string(position.z));
+            return a;
+        }
 
     protected:
         glm::vec3 position;

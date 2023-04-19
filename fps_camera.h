@@ -21,6 +21,8 @@ class FPSCamera : public Camera {
             pitch -= yRel * mouseSensitivity;
             if (pitch > 89) {pitch = 89;}
             if (pitch < -89) {pitch = -89;}
+            if (yaw < 0) {yaw += 360;}
+            if (yaw > 360) {yaw -= 360;}
             glm::vec3 front;
             front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
             front.y = sin(glm::radians(pitch));
@@ -42,6 +44,24 @@ class FPSCamera : public Camera {
         void moveSide(float amount){
             translate(glm::normalize(glm::cross(lookAt,up))*amount);
             update();
+        }
+
+        string getViewString(){
+            string a = "yaw: ";
+            a.append(to_string(yaw));
+            a.append(" pitch: ");
+            a.append(to_string(pitch));
+            return a;
+        }
+
+        string getLookAtString(){
+            string a = "x: ";
+            a.append(to_string(lookAt.x));
+            a.append(" y: ");
+            a.append(to_string(lookAt.y));
+            a.append(" z: ");
+            a.append(to_string(lookAt.z));
+            return a;
         }
 
     protected:
