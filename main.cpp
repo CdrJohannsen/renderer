@@ -19,6 +19,7 @@
 #include "shader.h"
 #include "framebuffer.h"
 #include "floating_camera.h"
+#include "light.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 //#define STB_TRUETYPE_IMPLEMENTATION
@@ -217,39 +218,18 @@ int main(int argc,char** argv)
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
 
-    int dirDirectionLocation = glGetUniformLocation(shader.getShaderID(),"u_dir_light.direction");
-    glm::vec3 sunColor(1.0f, 1.0f, 1.0f);
-    glm::vec4 sunDirection(0.0f, -1.0f, 0.0f, 0.0f);
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.diffuse"), 1, (float*)&sunColor);
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.specular"), 1, (float*)&sunColor);
-    sunColor *= 0.4f;
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_dir_light.ambient"), 1, (float*)&sunColor);
+    glm::vec3 sunColor(0.2f, 0.2f, 0.2f);
+    glm::vec3 sunDirection(0.0f, -1.0f, 0.0f);
+    DirLight sun(&shader,sunDirection,sunColor,0.4f);
 
-    glm::vec3 pointLightColor(0.0f, 0.0f, 0.0f);
-    glm::vec4 pointLightPosition(-40.0f,0.0f,0.0f,1.0f);
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_point_light.diffuse"), 1, (float*)&pointLightColor);
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_point_light.specular"), 1, (float*)&pointLightColor);
-    pointLightColor *= 0.2f;
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_point_light.ambient"), 1, (float*)&pointLightColor);
-
-    glUniform1f(glGetUniformLocation(shader.getShaderID(), "u_point_light.linear"), 0.017f);
-    glUniform1f(glGetUniformLocation(shader.getShaderID(), "u_point_light.quadratic"), 0.0018f);
-
-    int pointPositionLocation = glGetUniformLocation(shader.getShaderID(), "u_point_light.position");
+    glm::vec3 pointLightColor(0.0f, 1.0f, 1.0f);
+    glm::vec4 pointLightPosition(0.0f,4.5f,0.0f,1.0f);
+    PointLight point(&shader,pointLightPosition,pointLightColor,0.2f,0.017f,0.0018f);
 
     glm::vec3 spotLightColor(0.0f, 0.0f, 0.0f);
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_spot_light.diffuse"), 1, (float*)&spotLightColor);
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_spot_light.specular"), 1, (float*)&spotLightColor);
-    spotLightColor *= 0.1f;
-    glUniform3fv(glGetUniformLocation(shader.getShaderID(), "u_spot_light.ambient"), 1, (float*)&spotLightColor);
-
-    glUniform1f(glGetUniformLocation(shader.getShaderID(), "u_spot_light.outerCone"), 0.995f);
-    glUniform1f(glGetUniformLocation(shader.getShaderID(), "u_spot_light.innerCone"), 0.996f);
-
-    glm::vec4 spotLightPosition(0.0f,10.0f,0.0f,1.0f);
-    int spotPositionLocation = glGetUniformLocation(shader.getShaderID(), "u_spot_light.position");
-    glm::vec4 spotLightDirection(0.0f,1.0f,0.0f,0.0f);
-    int spotDirectionLocation = glGetUniformLocation(shader.getShaderID(), "u_spot_light.direction");
+    glm::vec4 spotLightPosition(7.0f,7.0f,7.0f,1.0f);
+    glm::vec3 spotLightDirection(5.0f,8.0f,8.0f);
+    SpotLight spot(&shader,spotLightPosition,spotLightDirection,spotLightColor,0.1f,0.996f,0.995f);
 
     Font font;
     font.initFont("ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
@@ -306,18 +286,9 @@ int main(int argc,char** argv)
         glm::mat4 modelView = camera.getView() * model;
         glm::mat4 invModelView = glm::transpose(glm::inverse(modelView));
 
-        glm::vec4 transformedSunDirection = glm::transpose(glm::inverse(camera.getView())) * sunDirection;
-        glUniform3fv(dirDirectionLocation, 1, (float*)&transformedSunDirection);
-
-        glm::mat4 pointLightMatrix = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), -delta, {0.0f,1.0f,0.0f});
-        pointLightPosition = pointLightMatrix * pointLightPosition;
-        glm::vec3 transformedPointLightPosition = (glm::vec3)(camera.getView() * pointLightPosition);
-        glUniform3fv(pointPositionLocation, 1, (float*)&transformedPointLightPosition);
-
-        glm::vec3 transformedSpotLightPosition = (glm::vec3)(camera.getView() * spotLightPosition);
-        glUniform3fv(spotPositionLocation, 1, (float*)&transformedSpotLightPosition);
-        glm::vec4 transformedSpotDirection = glm::transpose(glm::inverse(camera.getView())) * spotLightDirection;
-        glUniform3fv(spotDirectionLocation, 1, (float*)&transformedSpotDirection);
+        sun.update(camera.getView());
+        point.update(camera.getView(),glm::mat4(1.0f));
+        spot.update(camera.getView(),glm::mat4(1.0f));
 
         glUniformMatrix4fv(modelViewLocation, 1, GL_FALSE,&modelView[0][0]);
         glUniformMatrix4fv(invModelViewLocation, 1, GL_FALSE,&invModelView[0][0]);
