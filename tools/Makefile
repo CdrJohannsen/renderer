@@ -9,7 +9,7 @@ all:
 	$(CC) -o $(OUTPUT) $(TARGETS) $(LDLIBS) $(CFLAGS)
 
 run:
-	./$(OUTPUT) ../ressources/fern.FBX
+	./$(OUTPUT) ../ressources/box.fbx
 
 clear:
 	rm -f $(OUTPUT)

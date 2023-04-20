@@ -26,6 +26,18 @@ struct Material {
     GLuint specularMap;
 };
 
+struct ModLight {
+    int8_t type; // 1: Direction  2: Point  3: Spot
+    glm::vec3 position;
+    glm::vec3 direction;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    glm::vec3 ambient;
+    float innerCone;
+    float outerCone;
+    float linear;
+    float quadratic;
+};
 
 class Mesh {
     public:
@@ -105,11 +117,32 @@ class Model {
         void init(char* filename, Shader* shader){
             uint64_t numMeshes = 0;
             uint64_t numMaterials = 0;
+            uint64_t numLights = 0;
 
             ifstream input = ifstream(filename,ios::in | ios::binary);
             if (!input.is_open()){
                 cout << "Could not read model" << endl;
                 return;
+            }
+
+            // Lights
+            input.read((char*)&numLights, sizeof(uint64_t));
+            for (uint64_t i = 0; i < numLights; i++){
+                ModLight light = {};
+                input.read((char*)&light, sizeof(ModLight));
+
+                if(light.type == 0){
+                    cout << "Error when loading Model: undefined light source";
+                } else if (light.type == 1){
+                    DirLight l(shader,light.direction,light.diffuse,light.specular,light.ambient);
+                    dir_lights.push_back(l);
+                } else if (light.type == 2){
+                    PointLight l(shader,light.position,light.diffuse,light.specular,light.ambient,light.linear,light.quadratic);
+                    point_lights.push_back(l);
+                } else if (light.type == 3){
+                    SpotLight l(shader,light.position,light.direction,light.diffuse,light.specular,light.ambient,light.innerCone,light.outerCone);
+                    spot_lights.push_back(l);
+                }
             }
 
             // Materials
@@ -252,4 +285,7 @@ class Model {
     private:
         vector<Mesh*> meshes;
         vector<Material> materials;
+        vector<DirLight> dir_lights;
+        vector<PointLight> point_lights;
+        vector<SpotLight> spot_lights;
 };

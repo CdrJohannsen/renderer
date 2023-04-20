@@ -48,8 +48,22 @@ struct Mesh {
     int materialIndex;
 };
 
+struct Light {
+    int8_t type; // 1: Direction  2: Point  3: Spot
+    Position position;
+    Position direction;
+    Position diffuse;
+    Position specular;
+    Position ambient;
+    float innerCone;
+    float outerCone;
+    float linear;
+    float quadratic;
+};
+
 vector<Mesh> meshes;
 vector<Material> materials;
+vector<Light> lights;
 
 void processMesh(aiMesh* mesh,const aiScene* scene){
     Mesh m;
@@ -169,6 +183,26 @@ void processMaterials(const aiScene* scene){
     }
 }
 
+void processLights(const aiScene* scene){
+    for(uint32_t i = 0; i < scene->mNumLights; i++){
+        Light lig = {};
+        aiLight* light = scene->mLights[i];
+
+        lig.type = light->mType;
+        lig.position =  {light->mPosition.x,        light->mPosition.y,         light->mPosition.z};
+        lig.direction = {light->mDirection.x,       light->mDirection.y,        light->mDirection.z};
+        lig.diffuse =   {light->mColorDiffuse.r,    light->mColorDiffuse.g,     light->mColorDiffuse.b};
+        lig.specular =  {light->mColorSpecular.r,   light->mColorSpecular.g,    light->mColorSpecular.b};
+        lig.ambient =   {light->mColorAmbient.r,    light->mColorAmbient.g,     light->mColorAmbient.b};
+        lig.innerCone = light->mAngleInnerCone;
+        lig.outerCone = light->mAngleOuterCone;
+        lig.linear = light->mAttenuationLinear;
+        lig.quadratic = light->mAttenuationQuadratic;
+
+        lights.push_back(lig);
+    }
+}
+
 int main (int argc, char** argv) {
     if(argc <= 0){
         return 1;
@@ -185,9 +219,15 @@ int main (int argc, char** argv) {
         cout << "Error while loading model with assimp: " << importer.GetErrorString() << endl;
         return 1;
     }
-
-    processMaterials(scene);
-    processNode(scene->mRootNode, scene);
+    if (scene->HasLights()){
+        processLights(scene);
+    }
+    if (scene->HasMaterials()){
+        processMaterials(scene);
+    }
+    if (scene->HasMeshes()){
+        processNode(scene->mRootNode, scene);
+    }
 
     string filename = string(getFilename(argv[argc-1]));
     string filenameNoExt = filename.substr(0,filename.find_last_of('.'));
@@ -195,6 +235,42 @@ int main (int argc, char** argv) {
 
     ofstream output(outputFilename,ios::out | ios::binary);
     cout << "Writing mod file..." << endl;
+
+    // Lights
+    uint64_t numLights = lights.size();
+    output.write((char*)&numLights,sizeof(uint64_t));
+    for (Light light: lights) {
+        output.write((char*)&light,sizeof(Light));
+        /*
+        output.write((char*)&light.type,sizeof(uint8_t));
+
+        output.write((char*)&light.position.x,sizeof(float));
+        output.write((char*)&light.position.y,sizeof(float));
+        output.write((char*)&light.position.z,sizeof(float));
+
+        output.write((char*)&light.direction.x,sizeof(float));
+        output.write((char*)&light.direction.y,sizeof(float));
+        output.write((char*)&light.direction.z,sizeof(float));
+
+        output.write((char*)&light.diffuse.x,sizeof(float));
+        output.write((char*)&light.diffuse.y,sizeof(float));
+        output.write((char*)&light.diffuse.z,sizeof(float));
+
+        output.write((char*)&light.specular.x,sizeof(float));
+        output.write((char*)&light.specular.y,sizeof(float));
+        output.write((char*)&light.specular.z,sizeof(float));
+
+        output.write((char*)&light.ambient.x,sizeof(float));
+        output.write((char*)&light.ambient.y,sizeof(float));
+        output.write((char*)&light.ambient.z,sizeof(float));
+
+        output.write((char*)&light.linear,sizeof(float));
+        output.write((char*)&light.quadratic,sizeof(float));
+
+        output.write((char*)&light.innerCone,sizeof(float));
+        output.write((char*)&light.outerCone,sizeof(float));
+        */
+    }
 
     // Materials
     uint64_t numMaterials = materials.size();

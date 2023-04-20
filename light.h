@@ -43,6 +43,7 @@ class DirLight : public Light {
 class PointLight : public Light {
     public:
         PointLight(Shader* shader,glm::vec4 pos, glm::vec3 d, float a, float l, float q) : PointLight(shader,pos,d,d,d*a,l,q){}
+        PointLight(Shader* shader,glm::vec3 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q) : PointLight(shader,glm::vec4(pos,1.0f),d,s,a,l,q) {}
         PointLight(Shader* shader,glm::vec4 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q) : Light(d,s,a) {
             position = pos;
             glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_point_light.diffuse"), 1, (float*)&d);
@@ -67,6 +68,7 @@ class PointLight : public Light {
 class SpotLight : public Light {
     public:
         SpotLight(Shader* shader,glm::vec4 pos, glm::vec3 dir, glm::vec3 d, float a, float i, float o) : SpotLight(shader,pos,dir,d,d,d*a,i,o){}
+        SpotLight(Shader* shader,glm::vec3 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float i, float o) : SpotLight(shader,glm::vec4(pos,1.0f),dir,d,s,a,i,o){}
         SpotLight(Shader* shader,glm::vec4 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float i, float o) : Light(d,s,a) {
             position = pos;
             direction = glm::vec4(dir,0.0f);
