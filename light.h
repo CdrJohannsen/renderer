@@ -1,19 +1,17 @@
 
 class Light {
     public:
-        Light(glm::vec3 d, glm::vec3 s, glm::vec3 a){
+        Light(int i,glm::vec3 d, glm::vec3 s, glm::vec3 a){
             diffuse=d;
             specular=s;
             ambient=a;
+            index = to_string(i);
         }
 
-        Light(glm::vec3 d, float a){
-            diffuse=d;
-            specular=d;
-            ambient=d*a;
-        }
+        Light(int i, glm::vec3 d, float a) : Light(i,d,d,d*a){}
 
     protected:
+        string index;
         glm::vec3 diffuse;
         glm::vec3 specular;
         glm::vec3 ambient;
@@ -21,13 +19,13 @@ class Light {
 
 class DirLight : public Light {
     public:
-        DirLight(Shader* shader,glm::vec3 dir, glm::vec3 d, float a) : DirLight(shader,dir,d,d,d*a){}
-        DirLight(Shader* shader,glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a) : Light(d,s,a) {
+        DirLight(int i, Shader* shader,glm::vec3 dir, glm::vec3 d, float a) : DirLight(i,shader,dir,d,d,d*a){}
+        DirLight(int i, Shader* shader,glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a) : Light(i,d,s,a) {
             direction = glm::vec4(dir,0.0f);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_dir_light.diffuse"), 1, (float*)&d);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_dir_light.specular"), 1, (float*)&s);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_dir_light.ambient"), 1, (float*)&a);
-            directionLocation = glGetUniformLocation(shader->getShaderID(),"u_dir_light.direction");
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].diffuse").c_str()), 1, (float*)&d);
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].specular").c_str()), 1, (float*)&s);
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].ambient").c_str()), 1, (float*)&a);
+            directionLocation = glGetUniformLocation(shader->getShaderID(),((string)"u_dir_lights["+index+"].direction").c_str());
         }
 
         void update(glm::mat4 view){
@@ -42,16 +40,16 @@ class DirLight : public Light {
 
 class PointLight : public Light {
     public:
-        PointLight(Shader* shader,glm::vec4 pos, glm::vec3 d, float a, float l, float q) : PointLight(shader,pos,d,d,d*a,l,q){}
-        PointLight(Shader* shader,glm::vec3 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q) : PointLight(shader,glm::vec4(pos,1.0f),d,s,a,l,q) {}
-        PointLight(Shader* shader,glm::vec4 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q) : Light(d,s,a) {
+        PointLight(int i, Shader* shader,glm::vec4 pos, glm::vec3 d, float a, float l, float q) : PointLight(i,shader,pos,d,d,d*a,l,q){}
+        PointLight(int i, Shader* shader,glm::vec3 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q) : PointLight(i,shader,glm::vec4(pos,1.0f),d,s,a,l,q) {}
+        PointLight(int i, Shader* shader,glm::vec4 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q) : Light(i, d,s,a) {
             position = pos;
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_point_light.diffuse"), 1, (float*)&d);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_point_light.specular"), 1, (float*)&s);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_point_light.ambient"), 1, (float*)&a);
-            glUniform1f(glGetUniformLocation(shader->getShaderID(), "u_point_light.linear"), l);
-            glUniform1f(glGetUniformLocation(shader->getShaderID(), "u_point_light.quadratic"), q);
-            positionLocation = glGetUniformLocation(shader->getShaderID(),"u_point_light.position");
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].diffuse").c_str()), 1, (float*)&d);
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].specular").c_str()), 1, (float*)&s);
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].ambient").c_str()), 1, (float*)&a);
+            glUniform1f(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].linear").c_str()), l);
+            glUniform1f(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].quadratic").c_str()), q);
+            positionLocation = glGetUniformLocation(shader->getShaderID(),((string)"u_dir_lights["+index+"].position").c_str());
         }
 
         void update(glm::mat4 view,glm::mat4 posMat){
@@ -67,18 +65,19 @@ class PointLight : public Light {
 
 class SpotLight : public Light {
     public:
-        SpotLight(Shader* shader,glm::vec4 pos, glm::vec3 dir, glm::vec3 d, float a, float i, float o) : SpotLight(shader,pos,dir,d,d,d*a,i,o){}
-        SpotLight(Shader* shader,glm::vec3 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float i, float o) : SpotLight(shader,glm::vec4(pos,1.0f),dir,d,s,a,i,o){}
-        SpotLight(Shader* shader,glm::vec4 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float i, float o) : Light(d,s,a) {
+        SpotLight(int i, Shader* shader,glm::vec4 pos, glm::vec3 dir, glm::vec3 d, float a, float in, float o) : SpotLight(i, shader,pos,dir,d,d,d*a,in,o){}
+        SpotLight(int i, Shader* shader,glm::vec3 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float in, float o) : SpotLight(i, shader,glm::vec4(pos,1.0f),dir,d,s,a,in,o){}
+        SpotLight(int i, Shader* shader,glm::vec4 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float in, float o) : Light(i, d,s,a) {
             position = pos;
             direction = glm::vec4(dir,0.0f);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_spot_light.diffuse"), 1, (float*)&d);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_spot_light.specular"), 1, (float*)&s);
-            glUniform3fv(glGetUniformLocation(shader->getShaderID(), "u_spot_light.ambient"), 1, (float*)&a);
-            glUniform1f(glGetUniformLocation(shader->getShaderID(), "u_spot_light.innerCone"), i);
-            glUniform1f(glGetUniformLocation(shader->getShaderID(), "u_spot_light.outerCone"), o);
-            positionLocation = glGetUniformLocation(shader->getShaderID(),"u_spot_light.position");
-            directionLocation = glGetUniformLocation(shader->getShaderID(),"u_spot_light.direction");
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].diffuse").c_str()), 1, (float*)&d);
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].specular").c_str()), 1, (float*)&s);
+            glUniform3fv(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].ambient").c_str()), 1, (float*)&a);
+            glUniform1f(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].innerCone").c_str()), in);
+            glUniform1f(glGetUniformLocation(shader->getShaderID(), ((string)"u_dir_lights["+index+"].outerCone").c_str()), o);
+            positionLocation = glGetUniformLocation(shader->getShaderID(),((string)"u_dir_lights["+index+"].position").c_str());
+            directionLocation = glGetUniformLocation(shader->getShaderID(),((string)"u_dir_lights["+index+"].direction").c_str());
+            cout << a.b << endl;
         }
 
         void update(glm::mat4 view,glm::mat4 posMat){
