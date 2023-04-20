@@ -218,6 +218,7 @@ int main(int argc,char** argv)
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
 
+/*
     glm::vec3 sunColor(0.2f, 0.2f, 0.2f);
     glm::vec3 sunDirection(0.0f, -1.0f, 0.0f);
     DirLight sun(&shader,sunDirection,sunColor,0.4f);
@@ -230,6 +231,7 @@ int main(int argc,char** argv)
     glm::vec4 spotLightPosition(7.0f,7.0f,7.0f,1.0f);
     glm::vec3 spotLightDirection(5.0f,8.0f,8.0f);
     SpotLight spot(&shader,spotLightPosition,spotLightDirection,spotLightColor,0.1f,0.996f,0.995f);
+    */
 
     Font font;
     font.initFont("ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
@@ -286,9 +288,9 @@ int main(int argc,char** argv)
         glm::mat4 modelView = camera.getView() * model;
         glm::mat4 invModelView = glm::transpose(glm::inverse(modelView));
 
-        sun.update(camera.getView());
-        point.update(camera.getView(),glm::mat4(1.0f));
-        spot.update(camera.getView(),glm::mat4(1.0f));
+        //sun.update(camera.getView());
+        //point.update(camera.getView(),glm::mat4(1.0f));
+        //spot.update(camera.getView(),glm::mat4(1.0f));
 
         glUniformMatrix4fv(modelViewLocation, 1, GL_FALSE,&modelView[0][0]);
         glUniformMatrix4fv(invModelViewLocation, 1, GL_FALSE,&invModelView[0][0]);

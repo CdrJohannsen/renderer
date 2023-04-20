@@ -134,13 +134,13 @@ class Model {
                 if(light.type == 0){
                     cout << "Error when loading Model: undefined light source";
                 } else if (light.type == 1){
-                    DirLight l(shader,light.direction,light.diffuse,light.specular,light.ambient);
+                    DirLight l(i,shader,light.direction,light.diffuse,light.specular,light.ambient);
                     dir_lights.push_back(l);
                 } else if (light.type == 2){
-                    PointLight l(shader,light.position,light.diffuse,light.specular,light.ambient,light.linear,light.quadratic);
+                    PointLight l(i,shader,light.position,light.diffuse,light.specular,light.ambient,light.linear,light.quadratic);
                     point_lights.push_back(l);
                 } else if (light.type == 3){
-                    SpotLight l(shader,light.position,light.direction,light.diffuse,light.specular,light.ambient,light.innerCone,light.outerCone);
+                    SpotLight l(i,shader,light.position,light.direction,light.diffuse,light.specular,light.ambient,light.innerCone,light.outerCone);
                     spot_lights.push_back(l);
                 }
             }

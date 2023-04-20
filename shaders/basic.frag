@@ -1,5 +1,6 @@
 #version 330 core
 
+#define MAX_LIGHTS 3
 layout(location = 0) out vec4 f_color;
 
 in vec3 v_position;
@@ -47,13 +48,50 @@ struct SpotLight {
 };
 
 uniform Material u_material;
-uniform DirectionalLight u_dir_light;
-uniform PointLight u_point_light;
-uniform SpotLight u_spot_light;
+uniform DirectionalLight u_dir_lights[MAX_LIGHTS];
+uniform PointLight u_point_lights[MAX_LIGHTS];
+uniform SpotLight u_spot_lights[MAX_LIGHTS];
 
 uniform sampler2D u_diffuse_map;
 uniform sampler2D u_normal_map;
 uniform sampler2D u_specular_map;
+
+vec3 calcDirLight(DirectionalLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view){
+    vec3 light_dir = normalize(-light.direction);
+    vec3 reflection = reflect(light.direction, normal);
+    vec3 ambient = light.ambient * diffuseColor.xyz;
+    vec3 diffuse = light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor.xyz;
+    vec3 specular = light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
+    return ambient+diffuse+specular;
+}
+
+vec3 calcPointLight(PointLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view){
+    vec3 light_dir = normalize(light.position - v_position);
+    vec3 reflection = reflect(-light_dir, normal);
+    float distance_light = length(-light.position - v_position);
+    float attentuation = 1.0f / ((1.0f) + (light.linear * distance_light) + (light.quadratic * distance_light));
+    vec3 ambient = attentuation * light.ambient * diffuseColor;
+    vec3 diffuse = attentuation * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
+    vec3 specular = attentuation * light.specular * pow(max(dot(reflection, view), 0.00001), shininess/1.0f) * u_material.specular;
+    return ambient+diffuse+specular;
+}
+
+vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view){
+    vec3 light_dir = normalize(light.position - v_position);
+    vec3 reflection = reflect(-light_dir, normal);
+    float theta = dot(light.direction, normalize(light.direction));
+    float epsilon = light.innerCone - light.outerCone;
+    float intensity = clamp((theta - light.outerCone) / epsilon, 0.0f, 1.0f);
+    vec3 ambient, specular, diffuse;
+    if (theta > light.outerCone){
+        diffuse = intensity * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
+        specular = intensity * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
+        ambient = light.ambient * diffuseColor;
+    } else {
+        ambient = light.ambient * diffuseColor;
+    }
+    return ambient+diffuse+specular;
+}
 
 void main()
 {
@@ -88,33 +126,15 @@ void main()
         discard;
     }
 
-    vec3 light = normalize(-u_dir_light.direction);
-    vec3 reflection = reflect(u_dir_light.direction, normal);
-    vec3 ambient = u_dir_light.ambient * diffuseColor.xyz;
-    vec3 diffuse = u_dir_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-    vec3 specular = u_dir_light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
-
-    light = normalize(u_point_light.position - v_position);
-    reflection = reflect(-light, normal);
-    float distance_light = length(-u_point_light.position - v_position);
-    float attentuation = 1.0f / ((1.0f) + (u_point_light.linear * distance_light) + (u_point_light.quadratic * distance_light));
-    ambient += attentuation * u_point_light.ambient * diffuseColor.xyz;
-    diffuse += attentuation * u_point_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-    specular += attentuation * u_point_light.specular * pow(max(dot(reflection, view), 0.00001), shininess/1.0f) * u_material.specular;
-
-    light = normalize(u_spot_light.position - v_position);
-    reflection = reflect(-light, normal);
-    float theta = dot(light, normalize(u_spot_light.direction));
-    float epsilon = u_spot_light.innerCone - u_spot_light.outerCone;
-    float intensity = clamp((theta - u_spot_light.outerCone) / epsilon, 0.0f, 1.0f);
-    if (theta > u_spot_light.outerCone){
-        diffuse += intensity * u_spot_light.diffuse * max(dot(normal, light), 0.0) * diffuseColor.xyz;
-        specular += intensity * u_spot_light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
-        ambient += u_spot_light.ambient * diffuseColor.xyz;
-    } else {
-        ambient += u_spot_light.ambient * diffuseColor.xyz;
+    vec3 color;
+    for (int i = 0; i<MAX_LIGHTS; i++){
+        color += calcDirLight(u_dir_lights[i],diffuseColor.xyz, shininess, normal, view);
+        color += calcPointLight(u_point_lights[i],diffuseColor.xyz, shininess, normal, view);
+        color += calcSpotLight(u_spot_lights[i],diffuseColor.xyz, shininess, normal, view);
     }
 
-    f_color = vec4(ambient + diffuse + specular + u_material.emissive, 1.0f);
+
+
+    f_color = vec4(color + u_material.emissive, 1.0f);
     //f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
 }
