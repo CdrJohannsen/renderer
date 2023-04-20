@@ -19,11 +19,11 @@
 #include "shader.h"
 #include "framebuffer.h"
 #include "floating_camera.h"
-#include "light.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 //#define STB_TRUETYPE_IMPLEMENTATION
 //#include <stb/stb_truetype.h>
+#include "light.h"
 #include "mesh.h"
 #include "font.h"
 #include <glm/glm.hpp>
