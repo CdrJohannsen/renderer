@@ -10,7 +10,7 @@ class Camera {
         Camera(float fov, float width, float heigth) {
             projection = glm::perspective(fov/2.0f,width/heigth,0.2f,1000.0f);
             view = glm::mat4(1.0f);
-            position = glm::vec3(0.0f,0.0f,2.0f);
+            position = glm::vec3(0.0f,0.0f,5.0f);
             update();
         }
         

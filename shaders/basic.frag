@@ -87,6 +87,10 @@ vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 nor
         diffuse = intensity * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
         specular = intensity * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
         ambient = light.ambient * diffuseColor;
+        return diffuse;
+        if (diffuse.r <= 0.0f || diffuse.g <= 0.0f || diffuse.b <= 0.0f){
+            return vec3(1.0f,0.0f,0.0f);
+        }
     } else {
         ambient = light.ambient * diffuseColor;
     }
@@ -127,14 +131,26 @@ void main()
     }
 
     vec3 color = vec3(0.0f);
-    vec3 c;
-    for (int i = 0; i < MAX_LIGHTS; i++){
-        int j = i;
-        color += calcDirLight(u_dir_lights[j],diffuseColor.xyz, shininess, normal, view);
-        color += calcPointLight(u_point_lights[j],diffuseColor.xyz, shininess, normal, view);
-        color += calcSpotLight(u_spot_lights[j],diffuseColor.xyz, shininess, normal, view);
-
+    /*
+       for (int i = 0;i < MAX_LIGHTS;i++){
+    //color += calcDirLight(u_dir_lights[i],diffuseColor.xyz, shininess, normal, view);
+    //color += calcPointLight(u_point_lights[i],diffuseColor.xyz, shininess, normal, view);
+    vec3 c = calcSpotLight(u_spot_lights[i],diffuseColor.xyz, shininess, normal, view);
+    color = addVec(color,c);
     }
+     */
+    vec3 d0 = calcDirLight(u_dir_lights[0],diffuseColor.xyz, shininess, normal, view);
+    vec3 p0 = calcPointLight(u_point_lights[0],diffuseColor.xyz, shininess, normal, view);
+    vec3 p1 = calcPointLight(u_point_lights[1],diffuseColor.xyz, shininess, normal, view);
+    vec3 s0 = calcSpotLight(u_spot_lights[0],diffuseColor.xyz, shininess, normal, view);
+    vec3 s1 = calcSpotLight(u_spot_lights[1],diffuseColor.xyz, shininess, normal, view);
+    vec3 s2 = calcSpotLight(u_spot_lights[2],diffuseColor.xyz, shininess, normal, view);
+    vec3 s3 = calcSpotLight(u_spot_lights[3],diffuseColor.xyz, shininess, normal, view);
+    vec3 s4 = calcSpotLight(u_spot_lights[4],diffuseColor.xyz, shininess, normal, view);
+    vec3 s5 = calcSpotLight(u_spot_lights[5],diffuseColor.xyz, shininess, normal, view);
+    vec3 s6 = calcSpotLight(u_spot_lights[6],diffuseColor.xyz, shininess, normal, view);
+    vec3 s7 = calcSpotLight(u_spot_lights[7],diffuseColor.xyz, shininess, normal, view);
+    color = s0+s1+s2+s3+s4+s5+s6+s7+d0+p0+p1;
     f_color = vec4(color + u_material.emissive, 1.0f);
     //f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
 }

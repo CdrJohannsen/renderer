@@ -163,7 +163,7 @@ int main(int argc,char** argv)
     if (argc <= 1){
         cout << "Usage" << argv[0] << " [FILE]" << endl;
     }
-    SDL_Window* window = nullptr;
+    SDL_Window* window;
     SDL_Event e;
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -219,20 +219,20 @@ int main(int argc,char** argv)
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
 
-/*
-    glm::vec3 sunColor(0.2f, 0.2f, 0.2f);
-    glm::vec3 sunDirection(0.0f, -1.0f, 0.0f);
-    DirLight sun(&shader,sunDirection,sunColor,0.4f);
+    /*
+       glm::vec3 sunColor(0.2f, 0.2f, 0.2f);
+       glm::vec3 sunDirection(0.0f, -1.0f, 0.0f);
+       DirLight sun(&shader,sunDirection,sunColor,0.4f);
 
-    glm::vec3 pointLightColor(0.0f, 1.0f, 1.0f);
-    glm::vec4 pointLightPosition(0.0f,4.5f,0.0f,1.0f);
-    PointLight point(&shader,pointLightPosition,pointLightColor,0.2f,0.017f,0.0018f);
+       glm::vec3 pointLightColor(0.0f, 1.0f, 1.0f);
+       glm::vec4 pointLightPosition(0.0f,4.5f,0.0f,1.0f);
+       PointLight point(&shader,pointLightPosition,pointLightColor,0.2f,0.017f,0.0018f);
 
-    glm::vec3 spotLightColor(0.0f, 0.0f, 0.0f);
-    glm::vec4 spotLightPosition(7.0f,7.0f,7.0f,1.0f);
-    glm::vec3 spotLightDirection(5.0f,8.0f,8.0f);
-    SpotLight spot(&shader,spotLightPosition,spotLightDirection,spotLightColor,0.1f,0.996f,0.995f);
-    */
+       glm::vec3 spotLightColor(0.0f, 0.0f, 0.0f);
+       glm::vec4 spotLightPosition(7.0f,7.0f,7.0f,1.0f);
+       glm::vec3 spotLightDirection(5.0f,8.0f,8.0f);
+       SpotLight spot(&shader,spotLightPosition,spotLightDirection,spotLightColor,0.1f,0.996f,0.995f);
+       */
 
     Font font;
     font.initFont("ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
