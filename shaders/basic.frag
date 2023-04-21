@@ -1,6 +1,6 @@
 #version 330 core
 
-#define MAX_LIGHTS 6
+#define MAX_LIGHTS 8
 layout(location = 0) out vec4 f_color;
 
 in vec3 v_position;
@@ -132,11 +132,9 @@ void main()
         int j = i;
         color += calcDirLight(u_dir_lights[j],diffuseColor.xyz, shininess, normal, view);
         color += calcPointLight(u_point_lights[j],diffuseColor.xyz, shininess, normal, view);
-        c = calcSpotLight(u_spot_lights[j],diffuseColor.xyz, shininess, normal, view);
-        color += c;
+        color += calcSpotLight(u_spot_lights[j],diffuseColor.xyz, shininess, normal, view);
 
     }
-
     f_color = vec4(color + u_material.emissive, 1.0f);
     //f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
 }
