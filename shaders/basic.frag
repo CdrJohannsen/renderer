@@ -1,6 +1,6 @@
 #version 330 core
 
-#define MAX_LIGHTS 3
+#define MAX_LIGHTS 6
 layout(location = 0) out vec4 f_color;
 
 in vec3 v_position;
@@ -79,7 +79,7 @@ vec3 calcPointLight(PointLight light, vec3 diffuseColor, float shininess, vec3 n
 vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view){
     vec3 light_dir = normalize(light.position - v_position);
     vec3 reflection = reflect(-light_dir, normal);
-    float theta = dot(light.direction, normalize(light.direction));
+    float theta = dot(light_dir, normalize(light.direction));
     float epsilon = light.innerCone - light.outerCone;
     float intensity = clamp((theta - light.outerCone) / epsilon, 0.0f, 1.0f);
     vec3 ambient, specular, diffuse;
@@ -126,14 +126,16 @@ void main()
         discard;
     }
 
-    vec3 color;
-    for (int i = 0; i<MAX_LIGHTS; i++){
-        color += calcDirLight(u_dir_lights[i],diffuseColor.xyz, shininess, normal, view);
-        color += calcPointLight(u_point_lights[i],diffuseColor.xyz, shininess, normal, view);
-        color += calcSpotLight(u_spot_lights[i],diffuseColor.xyz, shininess, normal, view);
+    vec3 color = vec3(0.0f);
+    vec3 c;
+    for (int i = 0; i < MAX_LIGHTS; i++){
+        int j = i;
+        color += calcDirLight(u_dir_lights[j],diffuseColor.xyz, shininess, normal, view);
+        color += calcPointLight(u_point_lights[j],diffuseColor.xyz, shininess, normal, view);
+        c = calcSpotLight(u_spot_lights[j],diffuseColor.xyz, shininess, normal, view);
+        color += c;
+
     }
-
-
 
     f_color = vec4(color + u_material.emissive, 1.0f);
     //f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
