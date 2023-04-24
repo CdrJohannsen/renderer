@@ -87,10 +87,6 @@ vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 nor
         diffuse = intensity * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
         specular = intensity * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * u_material.specular;
         ambient = light.ambient * diffuseColor;
-        return diffuse;
-        if (diffuse.r <= 0.0f || diffuse.g <= 0.0f || diffuse.b <= 0.0f){
-            return vec3(1.0f,0.0f,0.0f);
-        }
     } else {
         ambient = light.ambient * diffuseColor;
     }
