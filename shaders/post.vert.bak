@@ -1,6 +1,9 @@
-#version 330 core
+#version 130
 
-out vec2 v_texCoord;
+varying vec2 v_texCoord;
+
+uniform sampler2D u_texture;
+uniform sampler2D u_depth;
 
 void main(){
     float x = -1.0 + float((gl_VertexID & 1) << 2);

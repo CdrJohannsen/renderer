@@ -29,6 +29,7 @@
 //#include <stb/stb_truetype.h>
 #include "light.h"
 #include "mesh.h"
+#include "cubemap.h"
 #include "font.h"
 #include <iostream>
 using namespace std;
@@ -36,7 +37,6 @@ using namespace std;
 #define WIDTH 1920.0f
 #define HEIGTH 1080.0f
 #define RATIO 1920.0f/1080.0f
-
 bool buttonW=false;
 bool buttonA=false;
 bool buttonS=false;
@@ -211,6 +211,7 @@ int main(int argc,char** argv)
 
     Shader fontShader("shaders/font.vert","shaders/font.frag");
     Shader postProcessShader("shaders/post.vert","shaders/post.frag");
+    Shader skyboxShader("shaders/sky.vert","shaders/sky.frag");
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
 
@@ -230,7 +231,7 @@ int main(int argc,char** argv)
        */
 
     Font font;
-    font.initFont("ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
+    font.initFont((char*)"ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
 
     Model modelTree;
     modelTree.init(argv[1],&shader);
@@ -260,6 +261,10 @@ int main(int argc,char** argv)
     }
     int w,h;
     SDL_GetWindowSize(window, &w, &h);
+
+    unsigned int cubemapTexture = loadCubemap(getCubemapTextures());
+    GLuint skyboxVAO = getSkyboxVAO();
+
     FrameBuffer framebuffer;
     framebuffer.create(w,h);
 
@@ -276,6 +281,11 @@ int main(int argc,char** argv)
         shader.bind();
 
         framebuffer.bind();
+
+
+        shader.bind();
+
+
 
         //model=glm::rotate(model,1.0f*delta,glm::vec3(0,1,0));
 
@@ -295,7 +305,27 @@ int main(int argc,char** argv)
 
         modelTree.render(camera.getView(),glm::mat4(1.0f));
         shader.unbind();
+
+        // Skybox
+        
+        glDepthFunc(GL_LEQUAL);
+        glm::mat4 projection = camera.getProj();
+        glm::mat4 view = glm::mat4(glm::mat3(camera.getView()));
+        skyboxShader.bind();
+        skyboxShader.setMat4("u_view",view);
+        skyboxShader.setMat4("u_projection",projection);
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glBindVertexArray(0);
+        //glBindVertexArray(1);
+        skyboxShader.unbind();
+        glDepthFunc(GL_LESS);
+
         framebuffer.unbind();
+
+        // Post Processing
 
         postProcessShader.bind();
         GLuint pPTextureLocation = glGetUniformLocation(postProcessShader.getShaderID(), "u_texture");
@@ -312,6 +342,8 @@ int main(int argc,char** argv)
         glActiveTexture(GL_TEXTURE0);
         glDrawArrays(GL_TRIANGLES,0,3);
         postProcessShader.unbind();
+
+        // Font overlay
 
         fontShader.bind();
 

@@ -8,7 +8,7 @@ class Camera {
     public:
 
         Camera(float fov, float width, float heigth) {
-            projection = glm::perspective(fov/2.0f,width/heigth,0.2f,1000.0f);
+            projection = glm::perspective(fov/2.0f,width/heigth,0.2f,500.0f);
             view = glm::mat4(1.0f);
             position = glm::vec3(0.0f,0.0f,5.0f);
             update();
@@ -16,6 +16,10 @@ class Camera {
         
         glm::mat4 getViewProj(){
             return viewProj;
+        }
+
+        glm::mat4 getProj(){
+            return projection;
         }
 
         glm::mat4 getView(){
