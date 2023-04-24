@@ -1,6 +1,6 @@
 #version 330 core
 
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 20
 layout(location = 0) out vec4 f_color;
 
 in vec3 v_position;
@@ -142,6 +142,7 @@ void main()
     vec3 d0 = calcDirLight(u_dir_lights[0],diffuseColor.xyz, shininess, normal, view);
     vec3 p0 = calcPointLight(u_point_lights[0],diffuseColor.xyz, shininess, normal, view);
     vec3 p1 = calcPointLight(u_point_lights[1],diffuseColor.xyz, shininess, normal, view);
+    vec3 p2 = calcPointLight(u_point_lights[2],diffuseColor.xyz, shininess, normal, view);
     vec3 s0 = calcSpotLight(u_spot_lights[0],diffuseColor.xyz, shininess, normal, view);
     vec3 s1 = calcSpotLight(u_spot_lights[1],diffuseColor.xyz, shininess, normal, view);
     vec3 s2 = calcSpotLight(u_spot_lights[2],diffuseColor.xyz, shininess, normal, view);
@@ -150,7 +151,13 @@ void main()
     vec3 s5 = calcSpotLight(u_spot_lights[5],diffuseColor.xyz, shininess, normal, view);
     vec3 s6 = calcSpotLight(u_spot_lights[6],diffuseColor.xyz, shininess, normal, view);
     vec3 s7 = calcSpotLight(u_spot_lights[7],diffuseColor.xyz, shininess, normal, view);
-    color = s0+s1+s2+s3+s4+s5+s6+s7+d0+p0+p1;
+    vec3 s8 = calcSpotLight(u_spot_lights[8],diffuseColor.xyz, shininess, normal, view);
+    vec3 s9 = calcSpotLight(u_spot_lights[9],diffuseColor.xyz, shininess, normal, view);
+    vec3 s10 = calcSpotLight(u_spot_lights[10],diffuseColor.xyz, shininess, normal, view);
+    vec3 s11 = calcSpotLight(u_spot_lights[11],diffuseColor.xyz, shininess, normal, view);
+    vec3 s12 = calcSpotLight(u_spot_lights[12],diffuseColor.xyz, shininess, normal, view);
+    vec3 s13 = calcSpotLight(u_spot_lights[13],diffuseColor.xyz, shininess, normal, view);
+    color = s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+d0+p0+p1+p2;
     f_color = vec4(color + u_material.emissive, 1.0f);
     //f_color = vec4(vec3(max(dot(normal, light), 0.0)),1.0f);
 }

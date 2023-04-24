@@ -36,11 +36,6 @@ using namespace std;
 #define WIDTH 1920.0f
 #define HEIGTH 1080.0f
 #define RATIO 1920.0f/1080.0f
-#define SCALE 50
-#define NEAR 0.1f
-#define FAR 1000.0f
-#define FOV 90.0f
-#define FOVRAD tan(FOV*0.5f/180.0f*M_PI)
 
 bool buttonW=false;
 bool buttonA=false;
