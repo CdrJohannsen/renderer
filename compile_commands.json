@@ -1,0 +1,7 @@
+{
+{
+    "directory": "/home/cdr-johannsen/Documents/Coding/C++/renderer/",
+    "arguments": ["/usr/bin/g++", "-Wall", "-g", "-lSDL2", "-lGL", "-lGLEW", "-o", "renderer", "main.cpp", "shader.cpp"],
+    "file": "main.cpp"
+}
+}
