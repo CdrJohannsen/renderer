@@ -1,3 +1,8 @@
+#pragma once
+#include <glm/glm.hpp>
+#include "shader.hpp"
+#include <iostream>
+using namespace std;
 
 class Light {
     public:

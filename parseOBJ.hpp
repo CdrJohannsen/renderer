@@ -1,6 +1,10 @@
+#pragma once
 #include <fstream>
 #include <string>
 #include <vector>
+#include "vect.hpp"
+#include "vert.hpp"
+#include "face.hpp"
 #include <iostream>
 using namespace std;
 

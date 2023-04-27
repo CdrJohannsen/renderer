@@ -1,4 +1,5 @@
-#include "fps_camera.h"
+#pragma once
+#include "fps_camera.hpp"
 
 class FloatingCamera: public FPSCamera {
     public:

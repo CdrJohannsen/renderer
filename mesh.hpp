@@ -3,7 +3,10 @@
 #include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include "shader.h"
+#include "shader.hpp"
+#include "vertex_buffer.hpp"
+#include "index_buffer.hpp"
+#include "light.hpp"
 
 //#define STB_IMAGE_IMPLEMENTATION
 //#include <stb/stb_image.h>

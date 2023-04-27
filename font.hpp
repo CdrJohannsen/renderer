@@ -1,6 +1,9 @@
+#pragma once
+#include <glm/glm.hpp>
+#include <SDL2/SDL.h>
+#include <GL/glew.h>
+#include "shader.hpp"
 #include <cstdio>
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb/stb_truetype.h>
 
 struct FontVertex {
     glm::vec2 position;
