@@ -1,3 +1,9 @@
+#pragma once
+#include <GL/glew.h>
+#include <vector>
+#include <iostream>
+using namespace std;
+
 
 unsigned int loadCubemap(vector<string> faces){
     unsigned int textureID;

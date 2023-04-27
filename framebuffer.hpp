@@ -1,4 +1,6 @@
-
+#pragma once
+#include <SDL2/SDL.h>
+#include <GL/glew.h>
 
 struct FrameBuffer {
 

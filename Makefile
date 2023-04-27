@@ -4,6 +4,7 @@ OUTPUT = renderer
 LDLIBS=-lSDL2 -lGL -lGLEW
 CFLAGS= -Wall -g
 TEST_MODEL= ./ressources/box.mod
+.DEFAULT_GOAL := debug-run
 
 all:
 	make clear
@@ -17,3 +18,6 @@ clear:
 
 debug:
 	$(CC) -o $(OUTPUT) $(TARGETS) $(LDLIBS) $(CFLAGS) -D _DEBUG
+
+debug-run:
+	make debug run

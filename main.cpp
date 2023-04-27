@@ -13,24 +13,25 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include "vect.h"
-#include "vert.h"
-#include "face.h"
-#include "matr.h"
-#include "vertex_buffer.h"
-#include "index_buffer.h"
+#include "vect.hpp"
+#include "vert.hpp"
+#include "face.hpp"
+#include "matr.hpp"
+#include "vertex_buffer.hpp"
+#include "index_buffer.hpp"
 //#include "parseOBJ.h"
-#include "shader.h"
-#include "framebuffer.h"
-#include "floating_camera.h"
+#include "shader.hpp"
+#include "framebuffer.hpp"
+#include "floating_camera.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
-//#define STB_TRUETYPE_IMPLEMENTATION
-//#include <stb/stb_truetype.h>
-#include "light.h"
-#include "mesh.h"
-#include "cubemap.h"
-#include "font.h"
+#define STB_TRUETYPE_IMPLEMENTATION
+#include <stb/stb_truetype.h>
+#include "light.hpp"
+#include "cubemap.hpp"
+#include "mesh.hpp"
+#include "font.hpp"
+#include "object.hpp"
 #include <iostream>
 using namespace std;
 
@@ -176,6 +177,7 @@ int main(int argc,char** argv)
 
     window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,1920,1080, flags);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
+    cout << glContext << endl;
 
     GLenum err = glewInit();
     if (err != GLEW_OK && err != 4){
@@ -376,5 +378,6 @@ int main(int argc,char** argv)
     }
     framebuffer.destroy();
 
+    SDL_SetRelativeMouseMode(SDL_FALSE);
     return 0;
 }

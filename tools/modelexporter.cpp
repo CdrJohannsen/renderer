@@ -213,7 +213,7 @@ int main (int argc, char** argv) {
     }
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(argv[argc-1], aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality | aiProcess_CalcTangentSpace);
+    const aiScene* scene = importer.ReadFile(argv[argc-1], aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality | aiProcess_CalcTangentSpace | aiProcess_FindInstances);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE, !scene->mRootNode){
         cout << "Error while loading model with assimp: " << importer.GetErrorString() << endl;

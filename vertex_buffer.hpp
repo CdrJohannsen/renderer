@@ -1,4 +1,6 @@
+#pragma once
 #include <GL/glew.h>
+#include "vert.hpp"
 
 struct VertexBuffer {
     VertexBuffer(void* data,int numVerticies){
