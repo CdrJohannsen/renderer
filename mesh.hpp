@@ -210,8 +210,8 @@ class Model {
                         glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
                         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
 
@@ -228,8 +228,8 @@ class Model {
                         glBindTexture(GL_TEXTURE_2D, material.normalMap);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
                         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
 
@@ -246,8 +246,8 @@ class Model {
                         glBindTexture(GL_TEXTURE_2D, material.specularMap);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
                         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,textureWidth,textureHeigth,0,GL_RGBA,GL_UNSIGNED_BYTE,textureBuffer);
 
@@ -303,7 +303,7 @@ class Model {
 
         void render(glm::mat4 view, glm::mat4 pos){
             for(DirLight light: dir_lights){
-                light.update(view);
+                light.update(view,pos);
             }
             for(PointLight light: point_lights){
                 light.update(view,pos);

@@ -32,121 +32,14 @@
 #include "mesh.hpp"
 #include "font.hpp"
 #include "object.hpp"
+#include "input.hpp"
 #include <iostream>
 using namespace std;
 
 #define WIDTH 1920.0f
 #define HEIGTH 1080.0f
 #define RATIO 1920.0f/1080.0f
-bool buttonW=false;
-bool buttonA=false;
-bool buttonS=false;
-bool buttonD=false;
-bool buttonSHIFT=false;
-bool buttonSPACE=false;
-bool buttonCTRL=false;
 
-float cameraSpeed = 6.0f;
-
-bool handleInput(SDL_Event &e, FloatingCamera &camera){
-    while (SDL_PollEvent(&e)) {
-        if(e.type == SDL_QUIT)
-            return false;
-        else if(e.type == SDL_KEYDOWN){
-            if (SDL_GetRelativeMouseMode()) {
-                switch(e.key.keysym.sym) {
-                    case SDLK_w:
-                        buttonW = true;
-                        break;
-                    case SDLK_s:
-                        buttonS = true;
-                        break;
-                    case SDLK_a:
-                        buttonA = true;
-                        break;
-                    case SDLK_d:
-                        buttonD = true;
-                        break;
-                    case SDLK_SPACE:
-                        buttonSPACE = true;
-                        break;
-                    case SDLK_LSHIFT:
-                        buttonSHIFT = true;
-                        break;
-                    case SDLK_LCTRL:
-                        buttonCTRL = true;
-                        break;
-                }
-            }
-            if (e.key.keysym.sym == SDLK_ESCAPE && SDL_GetRelativeMouseMode()) {
-                SDL_SetRelativeMouseMode(SDL_FALSE);
-            }
-        }
-        else if(e.type == SDL_KEYUP){
-            switch(e.key.keysym.sym) {
-                case SDLK_w:
-                    buttonW = false;
-                    break;
-                case SDLK_s:
-                    buttonS = false;
-                    break;
-                case SDLK_a:
-                    buttonA = false;
-                    break;
-                case SDLK_d:
-                    buttonD = false;
-                    break;
-                case SDLK_SPACE:
-                    buttonSPACE = false;
-                    break;
-                case SDLK_LSHIFT:
-                    buttonSHIFT = false;
-                    break;
-                case SDLK_LCTRL:
-                    buttonCTRL = false;
-                    break;
-            }
-        }
-        else if(e.type == SDL_MOUSEMOTION){
-            if(SDL_GetRelativeMouseMode()){
-                camera.onMouseMove(e.motion.xrel,e.motion.yrel);
-            }
-        }
-        else if(e.type == SDL_MOUSEBUTTONDOWN){
-            if (e.button.button == SDL_BUTTON_LEFT){
-                SDL_SetRelativeMouseMode(SDL_TRUE);
-            }
-        }
-    }
-    return true;
-}
-
-void handleMovement(FloatingCamera &camera, float &delta){
-    if(buttonW){
-        camera.moveFront(delta * cameraSpeed);
-    }
-    if(buttonS){
-        camera.moveFront(delta * -cameraSpeed);
-    }
-    if(buttonA){
-        camera.moveSide(delta * -cameraSpeed);
-    }
-    if(buttonD){
-        camera.moveSide(delta * cameraSpeed);
-    }
-    if(buttonSPACE){
-        camera.moveUp(delta * cameraSpeed);
-    }
-    if(buttonSHIFT){
-        camera.moveUp(delta * -cameraSpeed);
-    }
-    if(buttonCTRL){
-        cameraSpeed = 32.0f;
-    }
-    if(!buttonCTRL & (cameraSpeed == 32.0f)){
-        cameraSpeed = 6.0f;
-    }
-}
 void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,GLsizei length, const GLchar* message,const void* userParam){
     if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM){
 
@@ -177,7 +70,9 @@ int main(int argc,char** argv)
 
     window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,1920,1080, flags);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
-    cout << glContext << endl;
+    if(!glContext){
+        cout << "No context" << endl;
+    }
 
     GLenum err = glewInit();
     if (err != GLEW_OK && err != 4){
@@ -197,7 +92,8 @@ int main(int argc,char** argv)
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-    SDL_GL_SetSwapInterval(-1);
+    // Vsync = -1
+    SDL_GL_SetSwapInterval(0);
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -235,27 +131,13 @@ int main(int argc,char** argv)
     Font font;
     font.initFont((char*)"ressources/fonts/liberation-sans/LiberationSans-Bold.ttf");
 
-    Model modelTree;
-    modelTree.init(argv[1],&shader);
-
-    uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
-    uint64_t lastCounter = SDL_GetPerformanceCounter();
-    float delta = 0.0f; 
-    float time = 0;
-
-    glm::mat4 model = glm::mat4(1.0f);
-    //model = glm::scale(model,glm::vec3(0.1f));
+    // Model modelTree;
+    // modelTree.init(argv[1],&shader);
+    Object testfield(argv[1],&shader,{0,0,0});
 
     FloatingCamera camera(90.0f,1920.0f,1080.0f);
     //camera.translate(glm::vec3(0.0f,0.0f,5.0f));
     camera.update();
-
-    glm::mat4 modelViewProj = model * camera.getViewProj();
-
-
-    int modelViewLocation = glGetUniformLocation(shader.getShaderID(),"u_modelView");
-    int invModelViewLocation = glGetUniformLocation(shader.getShaderID(),"u_invModelView");
-    int modelViewProjMatrixLocation = glGetUniformLocation(shader.getShaderID(),"u_modelViewProj");
 
     int textureUniformLocation = glGetUniformLocation(shader.getShaderID(),"u_texture");
     if (textureUniformLocation != -1){
@@ -271,8 +153,14 @@ int main(int argc,char** argv)
     framebuffer.create(w,h);
 
     glClearColor(0.01f,0.01f,0.01f,1.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     uint32_t fps = 0;
+    uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
+    uint64_t lastCounter = SDL_GetPerformanceCounter();
+    float delta = 0.0f; 
+    float time = 0;
+    uint64_t endCounter = SDL_GetPerformanceCounter();
+    uint64_t counterElapsed = endCounter-lastCounter;
     bool running=true;
     while(running) {
         time += delta;
@@ -280,6 +168,7 @@ int main(int argc,char** argv)
         handleMovement(camera,delta);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         camera.update();
+        testfield.move(0.0f,delta,0.0f);
         shader.bind();
 
         framebuffer.bind();
@@ -292,21 +181,27 @@ int main(int argc,char** argv)
         //model=glm::rotate(model,1.0f*delta,glm::vec3(0,1,0));
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        modelViewProj = camera.getViewProj() * model;
-        glm::mat4 modelView = camera.getView() * model;
-        glm::mat4 invModelView = glm::transpose(glm::inverse(modelView));
 
         //sun.update(camera.getView());
         //point.update(camera.getView(),glm::mat4(1.0f));
         //spot.update(camera.getView(),glm::mat4(1.0f));
 
-        glUniformMatrix4fv(modelViewLocation, 1, GL_FALSE,&modelView[0][0]);
-        glUniformMatrix4fv(invModelViewLocation, 1, GL_FALSE,&invModelView[0][0]);
-        glUniformMatrix4fv(modelViewProjMatrixLocation, 1, GL_FALSE,&modelViewProj[0][0]);
         glActiveTexture(GL_TEXTURE0);
 
-        modelTree.render(camera.getView(),glm::mat4(1.0f));
+        //modelTree.render(camera.getView(),glm::mat4(1.0f));
+
+        endCounter = SDL_GetPerformanceCounter();
+        counterElapsed = endCounter-lastCounter;
+        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
+        cout << "Pre render: " << fixed << delta << endl;
+
+        testfield.render(camera);
         shader.unbind();
+
+        endCounter = SDL_GetPerformanceCounter();
+        counterElapsed = endCounter-lastCounter;
+        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
+        cout << "Pre sky: " << fixed << delta << endl;
 
         // Skybox
         
@@ -325,6 +220,12 @@ int main(int argc,char** argv)
 
         framebuffer.unbind();
 
+
+        endCounter = SDL_GetPerformanceCounter();
+        counterElapsed = endCounter-lastCounter;
+        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
+        cout << "Pre post: " << fixed << delta << endl;
+
         // Post Processing
 
         postProcessShader.bind();
@@ -342,6 +243,12 @@ int main(int argc,char** argv)
         glActiveTexture(GL_TEXTURE0);
         glDrawArrays(GL_TRIANGLES,0,3);
         postProcessShader.unbind();
+
+
+        endCounter = SDL_GetPerformanceCounter();
+        counterElapsed = endCounter-lastCounter;
+        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
+        cout << "Pre font: " << fixed << delta << endl;
 
         // Font overlay
 
@@ -367,12 +274,19 @@ int main(int argc,char** argv)
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
+        endCounter = SDL_GetPerformanceCounter();
+        counterElapsed = endCounter-lastCounter;
+        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
+        cout << "Pre swap: " << fixed << delta << endl;
+
+
         SDL_GL_SwapWindow(window);
 
-        uint64_t endCounter = SDL_GetPerformanceCounter();
-        uint64_t counterElapsed = endCounter-lastCounter;
+        endCounter = SDL_GetPerformanceCounter();
+        counterElapsed = endCounter-lastCounter;
         delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
         fps = (uint32_t)((float)perfCounterFrequency / (float)counterElapsed);
+        cout << "End: " << fixed << delta << endl;
         //cout << "FPS: " << fps << endl;
         lastCounter=endCounter;
     }
