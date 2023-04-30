@@ -9,7 +9,7 @@ struct VertexBuffer {
 
         glGenBuffers(1, &bufferID);
         glBindBuffer(GL_ARRAY_BUFFER,bufferID);
-        glBufferData(GL_ARRAY_BUFFER,numVerticies*sizeof(Vert),data,GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,numVerticies*sizeof(Vert),data,GL_DYNAMIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*) offsetof(struct Vert,position));

@@ -33,7 +33,8 @@ class DirLight : public Light {
             directionLocation = glGetUniformLocation(shader->getShaderID(),((string)"u_dir_lights["+index+"].direction").c_str());
         }
 
-        void update(glm::mat4 view){
+        void update(glm::mat4 view, glm::mat4 posMat){
+            direction = posMat * direction;
             glm::vec4 transformedDirection = glm::transpose(glm::inverse(view)) * direction;
             glUniform3fv(directionLocation, 1, (float*)&transformedDirection);
         }
@@ -89,6 +90,7 @@ class SpotLight : public Light {
             glm::vec3 transformedPosition = (glm::vec3)(view * position);
             glUniform3fv(positionLocation, 1, (float*)&transformedPosition);
 
+            direction = posMat * direction;
             glm::vec4 transformedDirection = glm::transpose(glm::inverse(view)) * direction;
             glUniform3fv(directionLocation, 1, (float*)&transformedDirection);
         }
