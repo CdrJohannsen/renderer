@@ -168,7 +168,7 @@ int main(int argc,char** argv)
         handleMovement(camera,delta);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         camera.update();
-        testfield.move(0.0f,delta,0.0f);
+        // testfield.move(0.0f,delta,0.0f);
         shader.bind();
 
         framebuffer.bind();
@@ -190,18 +190,8 @@ int main(int argc,char** argv)
 
         //modelTree.render(camera.getView(),glm::mat4(1.0f));
 
-        endCounter = SDL_GetPerformanceCounter();
-        counterElapsed = endCounter-lastCounter;
-        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
-        cout << "Pre render: " << fixed << delta << endl;
-
         testfield.render(camera);
         shader.unbind();
-
-        endCounter = SDL_GetPerformanceCounter();
-        counterElapsed = endCounter-lastCounter;
-        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
-        cout << "Pre sky: " << fixed << delta << endl;
 
         // Skybox
         
@@ -219,12 +209,6 @@ int main(int argc,char** argv)
         glDepthFunc(GL_LESS);
 
         framebuffer.unbind();
-
-
-        endCounter = SDL_GetPerformanceCounter();
-        counterElapsed = endCounter-lastCounter;
-        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
-        cout << "Pre post: " << fixed << delta << endl;
 
         // Post Processing
 
@@ -244,18 +228,13 @@ int main(int argc,char** argv)
         glDrawArrays(GL_TRIANGLES,0,3);
         postProcessShader.unbind();
 
-
-        endCounter = SDL_GetPerformanceCounter();
-        counterElapsed = endCounter-lastCounter;
-        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
-        cout << "Pre font: " << fixed << delta << endl;
-
         // Font overlay
 
         fontShader.bind();
 
         int w,h;
         SDL_GetWindowSize(window, &w, &h);
+        cout << w << " " << h << endl;
         glm::mat4 ortho = glm::ortho(0.0f, (float)w, (float)h, 0.0f);
         glUniformMatrix4fv(glGetUniformLocation(fontShader.getShaderID(), "u_viewProj"), 1, GL_FALSE, &ortho[0][0]);
         glDisable(GL_CULL_FACE);
@@ -273,12 +252,6 @@ int main(int argc,char** argv)
         fontShader.unbind();
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-
-        endCounter = SDL_GetPerformanceCounter();
-        counterElapsed = endCounter-lastCounter;
-        delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
-        cout << "Pre swap: " << fixed << delta << endl;
-
 
         SDL_GL_SwapWindow(window);
 
