@@ -69,7 +69,7 @@ vec3 calcPointLight(PointLight light, vec3 diffuseColor, float shininess, vec3 n
     vec3 light_dir = normalize(light.position - v_position);
     vec3 reflection = reflect(-light_dir, normal);
     float distance_light = length(-light.position - v_position);
-    float attentuation = 1.0f / ((1.0f) + (light.linear * distance_light) + (light.quadratic * distance_light));
+    float attentuation = 1.0f / (1.0f + (light.linear * distance_light) + (light.quadratic * distance_light));
     vec3 ambient = attentuation * light.ambient * diffuseColor;
     vec3 diffuse = attentuation * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
     vec3 specular = attentuation * light.specular * pow(max(dot(reflection, view), 0.00001), shininess/1.0f) * u_material.specular;
@@ -81,6 +81,8 @@ vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 nor
     vec3 reflection = reflect(-light_dir, normal);
     float theta = dot(light_dir, normalize(light.direction));
     float epsilon = light.innerCone - light.outerCone;
+    float distance_light = length(-light.position - v_position);
+    float attentuation = 1.0f / (1.0f + (light.outerCone * distance_light));
     float intensity = clamp((theta - light.outerCone) / epsilon, 0.0f, 1.0f);
     vec3 ambient, specular, diffuse;
     if (theta > light.outerCone){

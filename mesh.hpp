@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/fwd.hpp>
 #include <vector>
 #include <fstream>
 #include <glm/glm.hpp>
@@ -118,7 +119,7 @@ class Mesh {
 class Model {
     public:
 
-        void init(char* filename, Shader* shader){
+        void init(char* filename, Shader* shader, Shader* light_shader){
             uint64_t numMeshes = 0;
             uint64_t numMaterials = 0;
             uint64_t numLights = 0;
@@ -135,11 +136,12 @@ class Model {
             int numDir = 0;
             int numPoint = 0;
             int numSpot = 0;
+            light_shader->bind();
             for (uint64_t i = 0; i < numLights; i++){
                 ModLight light = {};
                 input.read((char*)&light, sizeof(ModLight));
                 if (light.type == 1){
-                    glm::vec3 scale(8.0f);
+                    glm::vec3 scale(4.0f);
                     light.diffuse /= scale;
                     light.specular /= scale;
                     light.ambient /= scale;
@@ -155,25 +157,25 @@ class Model {
                 if(light.type == 0){
                     cout << "Error when loading Model: undefined light source";
                 } else if (light.type == 1){
-                    DirLight l(numDir,shader,light.direction,light.diffuse,light.specular,light.ambient);
+                    DirLight l(numDir,light_shader,light.direction,light.diffuse,light.specular,light.ambient);
                     numDir++;
                     dir_lights.push_back(l);
                 } else if (light.type == 2){
-                    PointLight l(numPoint,shader,light.position,light.diffuse,light.specular,light.ambient,light.linear,light.quadratic);
+                    PointLight l(numPoint,light_shader,light.position,light.diffuse,light.specular,light.ambient,light.linear,light.quadratic);
                     numPoint++;
                     point_lights.push_back(l);
                 } else if (light.type == 3){
-                    SpotLight l(numSpot,shader,light.position,light.direction,light.diffuse,light.specular,light.ambient,cos(light.innerCone/2),cos(light.outerCone/2));
+                    SpotLight l(numSpot,light_shader,light.position,light.direction,light.diffuse,light.specular,light.ambient,cos(light.innerCone/2),cos(light.outerCone/2));
                     numSpot++;
-
-                    //cout << light.outerCone << endl;
-                    //cout << light.innerCone << endl;
-                    //cout << 1-(light.outerCone/M_PI)/10 << endl << endl;
-                    //cout << 1-(light.innerCone/M_PI)/10 << endl;
-
                     spot_lights.push_back(l);
                 }
             }
+            // Add "sun" if there are no lights
+            if (numLights == 0){
+                DirLight light(0,light_shader,glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(1.0f),0.4f);
+                dir_lights.push_back(light);
+            }
+            shader->bind();
 
             // Materials
             input.read((char*)&numMaterials, sizeof(uint64_t));
@@ -301,7 +303,7 @@ class Model {
             }
         }
 
-        void render(glm::mat4 view, glm::mat4 pos){
+        void updateLights(glm::mat4 view, glm::mat4 pos){
             for(DirLight light: dir_lights){
                 light.update(view,pos);
             }
@@ -311,6 +313,8 @@ class Model {
             for(SpotLight light: spot_lights){
                 light.update(view,pos);
             }
+        }
+        void render(){
             for(Mesh* mesh: meshes){
                 mesh->render();
             }

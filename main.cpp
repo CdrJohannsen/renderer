@@ -1,4 +1,6 @@
 
+#include <iostream>
+using namespace std;
 #include <SDL2/SDL.h>
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -19,6 +21,7 @@
 #include "matr.hpp"
 #include "vertex_buffer.hpp"
 #include "index_buffer.hpp"
+#include "gbuffer.hpp"
 //#include "parseOBJ.h"
 #include "shader.hpp"
 #include "framebuffer.hpp"
@@ -32,9 +35,8 @@
 #include "mesh.hpp"
 #include "font.hpp"
 #include "object.hpp"
+#include "renderUtils.hpp"
 #include "input.hpp"
-#include <iostream>
-using namespace std;
 
 #define WIDTH 1920.0f
 #define HEIGTH 1080.0f
@@ -63,7 +65,7 @@ int main(int argc,char** argv)
     uint32_t flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE;
 
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -93,7 +95,7 @@ int main(int argc,char** argv)
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
     // Vsync = -1
-    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval(-1);
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -112,6 +114,8 @@ int main(int argc,char** argv)
     Shader skyboxShader("shaders/sky.vert","shaders/sky.frag");
     Shader shader("shaders/basic.vert","shaders/basic.frag");
     shader.bind();
+    Shader gBufferShader("shaders/gBuffer.vert","shaders/gBuffer.frag");
+    Shader deferredShader("shaders/deferred.vert","shaders/deferred.frag");
 
     /*
        glm::vec3 sunColor(0.2f, 0.2f, 0.2f);
@@ -133,16 +137,16 @@ int main(int argc,char** argv)
 
     // Model modelTree;
     // modelTree.init(argv[1],&shader);
-    Object testfield(argv[1],&shader,{0,0,0});
+    Object testfield(argv[1],&gBufferShader,&deferredShader,{0,0,0});
 
     FloatingCamera camera(90.0f,1920.0f,1080.0f);
     //camera.translate(glm::vec3(0.0f,0.0f,5.0f));
     camera.update();
 
-    int textureUniformLocation = glGetUniformLocation(shader.getShaderID(),"u_texture");
-    if (textureUniformLocation != -1){
-        glUniform1i(textureUniformLocation,0);
-    }
+    // int textureUniformLocation = glGetUniformLocation(shader.getShaderID(),"u_texture");
+    // if (textureUniformLocation != -1){
+        // glUniform1i(textureUniformLocation,0);
+    // }
     int w,h;
     SDL_GetWindowSize(window, &w, &h);
 
@@ -151,6 +155,13 @@ int main(int argc,char** argv)
 
     FrameBuffer framebuffer;
     framebuffer.create(w,h);
+
+    GBuffer gBuffer;
+    gBuffer.create(w,h);
+    deferredShader.bind();
+    deferredShader.setInt("gPosition", 0);
+    deferredShader.setInt("gNormal", 1);
+    deferredShader.setInt("gColorSpec", 2);
 
     glClearColor(0.01f,0.01f,0.01f,1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -169,32 +180,40 @@ int main(int argc,char** argv)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         camera.update();
         // testfield.move(0.0f,delta,0.0f);
-        shader.bind();
-
-        framebuffer.bind();
-
-
-        shader.bind();
 
 
 
         //model=glm::rotate(model,1.0f*delta,glm::vec3(0,1,0));
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //sun.update(camera.getView());
         //point.update(camera.getView(),glm::mat4(1.0f));
         //spot.update(camera.getView(),glm::mat4(1.0f));
 
-        glActiveTexture(GL_TEXTURE0);
+        // glActiveTexture(GL_TEXTURE0);
 
         //modelTree.render(camera.getView(),glm::mat4(1.0f));
-
+        gBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gBufferShader.bind();
+        
         testfield.render(camera);
-        shader.unbind();
+        gBuffer.unbind();
+        gBufferShader.unbind();
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        deferredShader.bind();
+        gBuffer.bindTexture();
+        testfield.updateLights(camera);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        renderQuad();
+        deferredShader.unbind();
+        glActiveTexture(GL_TEXTURE0);
+        // gBuffer.blitFramebuffer();
 
         // Skybox
-        
+        /*
         glDepthFunc(GL_LEQUAL);
         glm::mat4 projection = camera.getProj();
         glm::mat4 view = glm::mat4(glm::mat3(camera.getView()));
@@ -252,16 +271,19 @@ int main(int argc,char** argv)
         fontShader.unbind();
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+        */
 
         SDL_GL_SwapWindow(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         endCounter = SDL_GetPerformanceCounter();
         counterElapsed = endCounter-lastCounter;
         delta = ((float)counterElapsed) / ((float)perfCounterFrequency);
         fps = (uint32_t)((float)perfCounterFrequency / (float)counterElapsed);
-        cout << "End: " << fixed << delta << endl;
+        // cout << "End: " << fixed << delta << endl;
         //cout << "FPS: " << fps << endl;
         lastCounter=endCounter;
+        // return 0;
     }
     framebuffer.destroy();
 
