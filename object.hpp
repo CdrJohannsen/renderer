@@ -6,11 +6,12 @@
 #include <string>
 #include "floating_camera.hpp"
 #include "mesh.hpp"
+#include "shader.hpp"
 
 class Object{
     public:
-        Object(char* filename, Shader* shader, glm::vec3 p, glm::vec3 r = {0,0,0}, glm::vec3 s = {1,1,1}){
-            model.init(filename,shader);
+        Object(char* filename, Shader* shader, Shader* light_shader, glm::vec3 p, glm::vec3 r = {0,0,0}, glm::vec3 s = {1,1,1}){
+            model.init(filename,shader,light_shader);
             position = p;
             rotation = r;
             size = s;
@@ -20,7 +21,7 @@ class Object{
             // Set uniforms
             modelViewLocation = glGetUniformLocation(shader->getShaderID(),"u_modelView");
             invModelViewLocation = glGetUniformLocation(shader->getShaderID(),"u_invModelView");
-            modelViewProjMatrixLocation = glGetUniformLocation(shader->getShaderID(),"u_modelViewProj");
+            modelViewProjLocation = glGetUniformLocation(shader->getShaderID(),"u_modelViewProj");
         }
 
         void render(FloatingCamera camera){
@@ -29,8 +30,12 @@ class Object{
             invModelView = glm::transpose(glm::inverse(modelView));
             glUniformMatrix4fv(modelViewLocation, 1, GL_FALSE,&modelView[0][0]);
             glUniformMatrix4fv(invModelViewLocation, 1, GL_FALSE,&invModelView[0][0]);
-            glUniformMatrix4fv(modelViewProjMatrixLocation, 1, GL_FALSE,&modelViewProj[0][0]);
-            model.render(camera.getView(), modelMat);
+            glUniformMatrix4fv(modelViewProjLocation, 1, GL_FALSE,&modelViewProj[0][0]);
+            model.render();
+        }
+
+        void updateLights(FloatingCamera camera){
+            model.updateLights(camera.getView(), modelMat);
         }
 
         void move(float x, float y, float z){
@@ -54,9 +59,9 @@ class Object{
         glm::mat4 invModelView;
         glm::mat4 modelView;
         glm::mat4 modelViewProj;
-        int modelViewLocation ;
-        int invModelViewLocation;
-        int modelViewProjMatrixLocation;
+        GLuint modelViewLocation ;
+        GLuint invModelViewLocation;
+        GLuint modelViewProjLocation;
         glm::vec3 position;
         glm::vec3 rotation;
         glm::vec3 size;
