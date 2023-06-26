@@ -95,7 +95,7 @@ int main(int argc,char** argv)
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
     // Vsync = -1
-    SDL_GL_SetSwapInterval(-1);
+    SDL_GL_SetSwapInterval(0);
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -207,13 +207,13 @@ int main(int argc,char** argv)
         gBuffer.bindTexture();
         testfield.updateLights(camera);
         // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE0);
         renderQuad();
         deferredShader.unbind();
-        glActiveTexture(GL_TEXTURE0);
         // gBuffer.blitFramebuffer();
 
         // Skybox
-        /*
+        
         glDepthFunc(GL_LEQUAL);
         glm::mat4 projection = camera.getProj();
         glm::mat4 view = glm::mat4(glm::mat3(camera.getView()));
@@ -227,8 +227,9 @@ int main(int argc,char** argv)
         skyboxShader.unbind();
         glDepthFunc(GL_LESS);
 
-        framebuffer.unbind();
-
+        // framebuffer.unbind();
+        
+        /*
         // Post Processing
 
         postProcessShader.bind();
@@ -246,14 +247,14 @@ int main(int argc,char** argv)
         glActiveTexture(GL_TEXTURE0);
         glDrawArrays(GL_TRIANGLES,0,3);
         postProcessShader.unbind();
-
+        */
         // Font overlay
 
         fontShader.bind();
 
         int w,h;
         SDL_GetWindowSize(window, &w, &h);
-        cout << w << " " << h << endl;
+        // cout << w << " " << h << endl;
         glm::mat4 ortho = glm::ortho(0.0f, (float)w, (float)h, 0.0f);
         glUniformMatrix4fv(glGetUniformLocation(fontShader.getShaderID(), "u_viewProj"), 1, GL_FALSE, &ortho[0][0]);
         glDisable(GL_CULL_FACE);
@@ -270,8 +271,9 @@ int main(int argc,char** argv)
 
         fontShader.unbind();
         glEnable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        */
+        
 
         SDL_GL_SwapWindow(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

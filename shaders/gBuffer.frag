@@ -3,6 +3,7 @@
 layout(location = 0) out vec3 gPosition;
 layout(location = 1) out vec3 gNormal;
 layout(location = 2) out vec4 gColorSpec;
+layout(location = 3) out vec4 gEmissive;
 
 in vec3 v_position;
 in vec2 v_texCoord;
@@ -61,6 +62,7 @@ void main()
     gNormal = normal;
     gColorSpec.rgb = diffuseColor.rgb;
     gColorSpec.a = shininess;
+    gEmissive.rgb = u_material.emissive;
 
     /*
     gPosition = v_position;
