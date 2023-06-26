@@ -41,6 +41,7 @@ uniform SpotLight u_spot_lights[MAX_LIGHTS];
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gColorSpec;
+uniform sampler2D gEmissive;
 
 vec3 calcDirLight(DirectionalLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view, vec3 position){
     vec3 light_dir = normalize(-light.direction);
@@ -142,6 +143,40 @@ void main()
     vec3 s13 = calcSpotLight(u_spot_lights[13],Diffuse, Specular, Normal, view, FragPos);
     color = s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+d0+p0+p1+p2;
     
-    FragColor = vec4(color,1.0f);
+    gl_FragDepth = 1000.0f/(FragPos.z);
+    const float gamma = 1.0;
+    // reinhard tone mapping
+    vec3 mapped = color / (color + vec3(1.0));
+    // gamma correction 
+    mapped = pow(mapped, vec3(1.0 / gamma));
+  
+    FragColor = vec4(mapped, 1.0);
+    /*
+    if (color.r > 1.0){
+        if (color.g > 1.0){
+            if (color.b > 1.0){
+                FragColor = vec4(1.0,0.0,0.0,1.0);
+            }
+        }
+    }
+    */
+    return;
+
+    
+    if (gl_FragCoord.x < 960){
+        if (gl_FragCoord.y < 540){
+            FragColor = vec4(mapped,1.0f);
+        }else{
+            FragColor = vec4(Diffuse,1.0f);
+        }
+    }else if (gl_FragCoord.x > 960){
+        if (gl_FragCoord.y < 540){
+            FragColor = vec4(Normal,1.0f);
+        }else{
+            FragColor = vec4(color,1.0f);
+        }
+    }
+    
+    // FragColor = vec4(vec3(-FragPos.z),1.0f);
     // FragColor = vec4(Specular);
 }
