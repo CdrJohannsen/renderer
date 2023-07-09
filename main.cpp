@@ -5,6 +5,9 @@ using namespace std;
 #define GLEW_STATIC
 #include <GL/glew.h>
 #define SDL_MAIN_HANDLED
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
 //#include <GL/gl.h>
 //#include <SDL2/SDL_opengl.h>
 #include <fstream>
@@ -65,8 +68,8 @@ int main(int argc,char** argv)
     uint32_t flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE;
 
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
@@ -99,9 +102,25 @@ int main(int argc,char** argv)
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
+    // IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL2_InitForOpenGL(window, glContext);
+    const char* glsl_version = "#version 120";
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
+    // glEnable(GL_MULTISAMPLE);
 
 #ifdef _DEBUG
     glEnable(GL_DEBUG_OUTPUT);
@@ -162,6 +181,7 @@ int main(int argc,char** argv)
     deferredShader.setInt("gPosition", 0);
     deferredShader.setInt("gNormal", 1);
     deferredShader.setInt("gColorSpec", 2);
+    deferredShader.setInt("gEmissive", 3);
 
     glClearColor(0.01f,0.01f,0.01f,1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -179,6 +199,13 @@ int main(int argc,char** argv)
         handleMovement(camera,delta);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         camera.update();
+
+
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+
         // testfield.move(0.0f,delta,0.0f);
 
 
@@ -208,6 +235,7 @@ int main(int argc,char** argv)
         testfield.updateLights(camera);
         // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderQuad();
         deferredShader.unbind();
         // gBuffer.blitFramebuffer();
@@ -249,7 +277,7 @@ int main(int argc,char** argv)
         postProcessShader.unbind();
         */
         // Font overlay
-
+        /*
         fontShader.bind();
 
         int w,h;
@@ -273,6 +301,16 @@ int main(int argc,char** argv)
         glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+        */
+
+        ImGui::Begin("Info");
+        ImGui::Text("Frametime: %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::Text(camera.getPositionString().c_str());
+        ImGui::Text(camera.getViewString().c_str());
+        ImGui::Text(camera.getLookAtString().c_str());
+        ImGui::End();
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
 
         SDL_GL_SwapWindow(window);
@@ -287,6 +325,11 @@ int main(int argc,char** argv)
         lastCounter=endCounter;
         // return 0;
     }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    SDL_GL_DeleteContext(glContext);
+    SDL_DestroyWindow(window);
     framebuffer.destroy();
 
     SDL_SetRelativeMouseMode(SDL_FALSE);
