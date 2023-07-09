@@ -120,6 +120,7 @@ void main()
     vec3 Normal = texture(gNormal, TexCoords).rgb;
     vec3 Diffuse = texture(gColorSpec, TexCoords).rgb;
     float Specular = texture(gColorSpec, TexCoords).a;
+    vec3 Emissive = texture(gEmissive, TexCoords).rgb;
     vec3 view = normalize(-FragPos);
     // f_color = vec4(color + u_material.emissive, 1.0f);
     vec3 color = vec3(0.0f);
@@ -144,13 +145,16 @@ void main()
     color = s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+d0+p0+p1+p2;
     
     gl_FragDepth = 1000.0f/(FragPos.z);
-    const float gamma = 1.0;
+    const float gamma = 1.8;
+    const float exposure = 0.1;
+    vec3 mapped = vec3(1.0) - exp(-color * exposure);
+    mapped = pow(mapped, vec3( 1.0 / gamma ));
     // reinhard tone mapping
-    vec3 mapped = color / (color + vec3(1.0));
+    // vec3 mapped = color / (color + vec3(1.0));
     // gamma correction 
-    mapped = pow(mapped, vec3(1.0 / gamma));
+    // mapped = pow(mapped, vec3(1.0 / gamma));
   
-    FragColor = vec4(mapped, 1.0);
+    FragColor = vec4(mapped + Emissive, 1.0);
     /*
     if (color.r > 1.0){
         if (color.g > 1.0){

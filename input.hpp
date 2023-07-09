@@ -1,6 +1,9 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "floating_camera.hpp"
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
 
 struct{
     bool buttonW=false;
@@ -16,9 +19,17 @@ float cameraSpeed = 6.0f;
 
 bool handleInput(SDL_Event &e, FloatingCamera &camera){
     while (SDL_PollEvent(&e)) {
+        ImGui_ImplSDL2_ProcessEvent(&e);
         if(e.type == SDL_QUIT)
             return false;
         else if(e.type == SDL_KEYDOWN){
+            if (e.key.keysym.sym == SDLK_ESCAPE && !SDL_GetRelativeMouseMode()) {
+                SDL_SetRelativeMouseMode(SDL_TRUE);
+                cout << "test" << endl;
+            }
+            else if (e.key.keysym.sym == SDLK_ESCAPE && SDL_GetRelativeMouseMode()) {
+                SDL_SetRelativeMouseMode(SDL_FALSE);
+            }
             if (SDL_GetRelativeMouseMode()) {
                 switch(e.key.keysym.sym) {
                     case SDLK_w:
@@ -43,9 +54,6 @@ bool handleInput(SDL_Event &e, FloatingCamera &camera){
                         pressedButtons.buttonCTRL = true;
                         break;
                 }
-            }
-            if (e.key.keysym.sym == SDLK_ESCAPE && SDL_GetRelativeMouseMode()) {
-                SDL_SetRelativeMouseMode(SDL_FALSE);
             }
         }
         else if(e.type == SDL_KEYUP){
@@ -78,11 +86,11 @@ bool handleInput(SDL_Event &e, FloatingCamera &camera){
                 camera.onMouseMove(e.motion.xrel,e.motion.yrel);
             }
         }
-        else if(e.type == SDL_MOUSEBUTTONDOWN){
-            if (e.button.button == SDL_BUTTON_LEFT){
-                SDL_SetRelativeMouseMode(SDL_TRUE);
-            }
-        }
+        // else if(e.type == SDL_MOUSEBUTTONDOWN){
+            // if (e.button.button == SDL_BUTTON_LEFT){
+                // SDL_SetRelativeMouseMode(SDL_TRUE);
+            // }
+        // }
     }
     return true;
 }
