@@ -71,7 +71,7 @@ int main(int argc,char** argv)
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
     window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,1920,1080, flags);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
@@ -303,6 +303,12 @@ int main(int argc,char** argv)
         glEnable(GL_DEPTH_TEST);
         */
 
+#ifdef _DEBUG
+
+        ImGui::Begin("Objects");
+        testfield.renderDebugUI();
+        ImGui::End();
+
         ImGui::Begin("Info");
         ImGui::Text("Frametime: %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::Text(camera.getPositionString().c_str());
@@ -311,6 +317,7 @@ int main(int argc,char** argv)
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
         
 
         SDL_GL_SwapWindow(window);

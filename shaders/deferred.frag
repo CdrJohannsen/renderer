@@ -56,10 +56,10 @@ vec3 calcPointLight(PointLight light, vec3 diffuseColor, float shininess, vec3 n
     vec3 light_dir = normalize(light.position - position);
     vec3 reflection = reflect(-light_dir, normal);
     float distance_light = length(-light.position - position);
-    float attentuation = 1.0f / (1.0f + (light.linear * distance_light) + (light.quadratic * distance_light));
+    float attentuation = 1.0f / (1.0f + (light.linear * distance_light) + (light.quadratic * distance_light * distance_light));
     vec3 ambient = attentuation * light.ambient * diffuseColor;
     vec3 diffuse = attentuation * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
-    vec3 specular = attentuation * light.specular * pow(max(dot(reflection, view), 0.00001), shininess/1.0f) * diffuseColor;
+    vec3 specular = attentuation * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * diffuseColor;
     return ambient+diffuse+specular;
 }
 
@@ -145,8 +145,8 @@ void main()
     color = s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+d0+p0+p1+p2;
     
     gl_FragDepth = 1000.0f/(FragPos.z);
-    const float gamma = 1.8;
-    const float exposure = 0.1;
+    const float gamma = 2.2;
+    const float exposure = 1.05;
     vec3 mapped = vec3(1.0) - exp(-color * exposure);
     mapped = pow(mapped, vec3( 1.0 / gamma ));
     // reinhard tone mapping
