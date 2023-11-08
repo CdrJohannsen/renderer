@@ -7,6 +7,7 @@
 #include "floating_camera.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "imgui/imgui.h"
 
 class Object{
     public:
@@ -51,6 +52,12 @@ class Object{
         void rotate(float angle, float x, float y, float z){
             rotation += glm::vec3(x,y,z);
             modelMat = glm::rotate(modelMat,angle, glm::vec3(x,y,z));
+        }
+
+        void renderDebugUI(){
+            if(ImGui::TreeNode("Name")){
+                ImGui::DragFloat("Pos X", &position.x ,0.5,-FLT_MAX,+FLT_MAX);
+            }
         }
 
     private:
