@@ -2,7 +2,9 @@
 
 #include <iostream>
 
+#ifdef _DEBUG
 #include "backends/imgui_impl_sdl2.h"
+#endif
 
 struct {
     bool buttonW = false;
@@ -18,7 +20,9 @@ float cameraSpeed = 6.0f;
 
 bool handleInput(SDL_Event &e, FloatingCamera &camera) {
     while (SDL_PollEvent(&e)) {
+#ifdef _DEBUG
         ImGui_ImplSDL2_ProcessEvent(&e);
+#endif
         if (e.type == SDL_QUIT)
             return false;
         else if (e.type == SDL_KEYDOWN) {

@@ -18,7 +18,9 @@ class Object {
 
     void rotate(float angle, float x, float y, float z);
 
+#ifdef _DEBUG
     void renderDebugUI();
+#endif
 
    private:
     Model model;
