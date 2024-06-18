@@ -17,9 +17,9 @@ using namespace std;
 #include <glm/gtx/string_cast.hpp>
 #include <string>
 
-#include "gbuffer.hpp"
 #include "floating_camera.hpp"
 #include "framebuffer.hpp"
+#include "gbuffer.hpp"
 #include "shader.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>

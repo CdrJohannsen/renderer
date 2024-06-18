@@ -1,11 +1,12 @@
 #pragma once
 #include <GL/glew.h>
+
 #include <string>
 #include <vector>
 using namespace std;
 
-unsigned int loadCubemap(vector<string> faces) ;
+unsigned int loadCubemap(vector<string> faces);
 
-vector<string> getCubemapTextures() ;
+vector<string> getCubemapTextures();
 
-GLuint getSkyboxVAO() ;
+GLuint getSkyboxVAO();
