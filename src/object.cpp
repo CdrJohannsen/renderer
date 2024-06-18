@@ -6,7 +6,9 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "floating_camera.hpp"
+#ifdef _DEBUG
 #include "imgui.h"
+#endif
 #include "mesh.hpp"
 #include "shader.hpp"
 
@@ -51,8 +53,10 @@ void Object::rotate(float angle, float x, float y, float z) {
     modelMat = glm::rotate(modelMat, angle, glm::vec3(x, y, z));
 }
 
+#ifdef _DEBUG
 void Object::renderDebugUI() {
     if (ImGui::TreeNode("Name")) {
         ImGui::DragFloat("Pos X", &position.x, 0.5, -FLT_MAX, +FLT_MAX);
     }
 }
+#endif

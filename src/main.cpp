@@ -7,7 +7,10 @@ using namespace std;
 #define SDL_MAIN_HANDLED
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl2.h"
+#define STB_IMAGE_IMPLEMENTATION
+#ifdef _DEBUG
 #include "imgui.h"
+#endif
 // #include <GL/gl.h>
 // #include <SDL2/SDL_opengl.h>
 #include <cmath>
@@ -21,10 +24,7 @@ using namespace std;
 #include "framebuffer.hpp"
 #include "gbuffer.hpp"
 #include "shader.hpp"
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb/stb_truetype.h>
 
 #include "cubemap.hpp"
 #include "font.hpp"
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-    uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+    uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
+#ifdef _DEBUG
     // IMGUI
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -108,6 +109,7 @@ int main(int argc, char **argv) {
     ImGui_ImplSDL2_InitForOpenGL(window, glContext);
     const char *glsl_version = "#version 120";
     ImGui_ImplOpenGL3_Init(glsl_version);
+#endif
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -193,10 +195,12 @@ int main(int argc, char **argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         camera.update();
 
+#ifdef _DEBUG
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+#endif
 
         // testfield.move(0.0f,delta,0.0f);
 
@@ -322,9 +326,11 @@ int main(int argc, char **argv) {
         lastCounter = endCounter;
         // return 0;
     }
+#ifdef _DEBUG
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
+#endif
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
     framebuffer.destroy();
