@@ -3,3 +3,6 @@
 
 # too large model
 cube_floor.mod
+
+build
+.cache
