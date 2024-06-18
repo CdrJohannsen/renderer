@@ -1,10 +1,9 @@
 #pragma once
-#include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include <SDL2/SDL.h>
 
 struct FrameBuffer {
-
-    void create(uint32_t width,uint32_t heigth);
+    void create(uint32_t width, uint32_t heigth);
 
     GLuint getTextureID(int i);
 
@@ -14,7 +13,7 @@ struct FrameBuffer {
 
     void unbind();
 
-    private:
+   private:
     GLuint fbo;
     GLuint textures[2];
 };

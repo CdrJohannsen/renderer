@@ -1,18 +1,15 @@
 #pragma once
-#include <SDL2/SDL.h>
 #include <GL/glew.h>
-#include <iostream>
+#include <SDL2/SDL.h>
 
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
-void renderQuad(){
-    if (quadVAO == 0){
+void renderQuad() {
+    if (quadVAO == 0) {
         float quadVertices[] = {
             // positions        // texture Coords
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
         };
         // setup plane VAO
         glGenVertexArrays(1, &quadVAO);
