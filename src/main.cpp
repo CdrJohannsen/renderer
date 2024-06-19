@@ -1,4 +1,5 @@
 
+#include <stdlib.h>
 #include <iostream>
 using namespace std;
 #include <SDL2/SDL.h>
@@ -20,11 +21,11 @@ using namespace std;
 #include <glm/gtx/string_cast.hpp>
 #include <string>
 
+#include <stb/stb_image.h>
 #include "floating_camera.hpp"
 #include "framebuffer.hpp"
 #include "gbuffer.hpp"
 #include "shader.hpp"
-#include <stb/stb_image.h>
 
 #include "cubemap.hpp"
 #include "font.hpp"
@@ -46,6 +47,7 @@ void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 int main(int argc, char **argv) {
     if (argc <= 1) {
         cout << "Usage" << argv[0] << " [FILE]" << endl;
+        exit(1);
     }
     SDL_Window *window;
     SDL_Event e;
@@ -98,8 +100,8 @@ int main(int argc, char **argv) {
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();

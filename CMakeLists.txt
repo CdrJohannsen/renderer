@@ -4,6 +4,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*)
 
+add_subdirectory(tools)
+
 if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
   file(GLOB IMGUI ${PROJECT_SOURCE_DIR}/imgui/*
        ${PROJECT_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
@@ -24,3 +26,5 @@ if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
 endif()
 
 target_link_libraries(renderer SDL2 GLEW GL ${IMGUI_LIBRARY})
+
+add_custom_target(run WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND ${PROJECT_SOURCE_DIR}/build/renderer ${PROJECT_SOURCE_DIR}/ressources/box.mod)

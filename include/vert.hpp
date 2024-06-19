@@ -1,11 +1,7 @@
 #pragma once
-#include <math.h>
-
 #include <glm/glm.hpp>
-#include <iostream>
-using namespace std;
 
-class Vert {
+struct Vert {
    public:
     glm::vec3 position;
     glm::vec3 normal;
