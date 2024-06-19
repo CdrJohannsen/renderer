@@ -27,4 +27,4 @@ endif()
 
 target_link_libraries(renderer SDL2 GLEW GL ${IMGUI_LIBRARY})
 
-add_custom_target(run WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND ${PROJECT_SOURCE_DIR}/build/renderer ${PROJECT_SOURCE_DIR}/ressources/box.mod)
+add_custom_target(run DEPENDS renderer WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND ${PROJECT_SOURCE_DIR}/build/renderer ${PROJECT_SOURCE_DIR}/ressources/box.mod)
