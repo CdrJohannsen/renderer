@@ -77,6 +77,8 @@ vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 nor
         specular = intensity * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * diffuseColor;
         ambient = light.ambient * diffuseColor;
     } else {
+        diffuse = vec3(0.0);
+        specular = vec3(0.0);
         ambient = light.ambient * diffuseColor;
     }
     return ambient+diffuse+specular;
@@ -145,7 +147,7 @@ void main()
     color = s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+d0+p0+p1+p2;
     
     gl_FragDepth = 1000.0f/(FragPos.z);
-    const float gamma = 2.2;
+    const float gamma = 2.1;
     const float exposure = 1.05;
     vec3 mapped = vec3(1.0) - exp(-color * exposure);
     mapped = pow(mapped, vec3( 1.0 / gamma ));

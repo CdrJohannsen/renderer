@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+
 #include <iostream>
 using namespace std;
 #include <SDL2/SDL.h>
@@ -14,24 +15,23 @@ using namespace std;
 #endif
 // #include <GL/gl.h>
 // #include <SDL2/SDL_opengl.h>
+#include <stb/stb_image.h>
+
 #include <cmath>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <string>
-
-#include <stb/stb_image.h>
-#include "floating_camera.hpp"
-#include "framebuffer.hpp"
-#include "gbuffer.hpp"
-#include "shader.hpp"
 
 #include "cubemap.hpp"
+#include "floating_camera.hpp"
 #include "font.hpp"
+#include "framebuffer.hpp"
+#include "gbuffer.hpp"
 #include "input.hpp"
 #include "object.hpp"
 #include "renderUtils.hpp"
+#include "shader.hpp"
 
 #define WIDTH 1920.0f
 #define HEIGTH 1080.0f
@@ -100,8 +100,8 @@ int main(int argc, char **argv) {
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_MULTISAMPLE);
+    /*glEnable(GL_MULTISAMPLE);*/
 
 #ifdef _DEBUG
     glEnable(GL_DEBUG_OUTPUT);
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 
     // Model modelTree;
     // modelTree.init(argv[1],&shader);
-    Object testfield(argv[1], &gBufferShader, &deferredShader, {0, 0, 0});
+    Object testfield("Testfield",argv[1], &gBufferShader, &deferredShader, {0, 0, 0});
 
     FloatingCamera camera(90.0f, 1920.0f, 1080.0f);
     // camera.translate(glm::vec3(0.0f,0.0f,5.0f));
@@ -304,6 +304,7 @@ int main(int argc, char **argv) {
 
         ImGui::Begin("Objects");
         testfield.renderDebugUI();
+        testfield.move(0, 0, 0);
         ImGui::End();
 
         ImGui::Begin("Info");

@@ -5,7 +5,7 @@
 
 class Object {
    public:
-    Object(char* filename, Shader* shader, Shader* light_shader, glm::vec3 p, glm::vec3 r = {0, 0, 0},
+    Object(string n, char* filename, Shader* shader, Shader* light_shader, glm::vec3 p, glm::vec3 r = {0, 0, 0},
            glm::vec3 s = {1, 1, 1});
 
     void render(FloatingCamera camera);
@@ -23,6 +23,7 @@ class Object {
 #endif
 
    private:
+    string name;
     Model model;
     glm::mat4 modelMat;
     glm::mat4 invModelView;
