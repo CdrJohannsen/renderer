@@ -3,7 +3,6 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "floating_camera.hpp"
 #ifdef _DEBUG

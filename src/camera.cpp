@@ -3,7 +3,6 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 Camera::Camera(float fov, float width, float heigth) {
     projection = glm::perspective(fov / 2.0f, width / heigth, 0.2f, 500.0f);

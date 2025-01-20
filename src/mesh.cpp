@@ -5,7 +5,6 @@
 #include <fstream>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
 Mesh::Mesh(vector<Vert> &vertices, uint64_t numVertices, vector<uint32_t> &indices, uint64_t numIndices,
