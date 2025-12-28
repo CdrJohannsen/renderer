@@ -30,7 +30,7 @@ struct Material {
 };
 
 struct ModLight {
-    int8_t type; // 1: Direction  2: Point  3: Spot
+    int8_t type;  // 1: Direction  2: Point  3: Spot
     glm::vec3 position;
     glm::vec3 direction;
     glm::vec3 diffuse;
@@ -76,6 +76,10 @@ class Model {
     void updateLights(glm::mat4 view, glm::mat4 pos);
 
     void render();
+
+#ifdef _DEBUG
+    void renderDebugUI();
+#endif
 
     ~Model();
 

@@ -9,14 +9,12 @@ struct DirectionalLight {
     vec3 direction;
     vec3 diffuse;
     vec3 specular;
-    vec3 ambient;
 };
 
 struct PointLight {
     vec3 position;
     vec3 diffuse;
     vec3 specular;
-    vec3 ambient;
 
     float linear;
     float quadratic;
@@ -31,7 +29,6 @@ struct SpotLight {
 
     vec3 diffuse;
     vec3 specular;
-    vec3 ambient;
 };
 
 uniform DirectionalLight u_dir_lights[MAX_LIGHTS];
@@ -46,21 +43,19 @@ uniform sampler2D gEmissive;
 vec3 calcDirLight(DirectionalLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view, vec3 position){
     vec3 light_dir = normalize(-light.direction);
     vec3 reflection = reflect(light.direction, normal);
-    vec3 ambient = light.ambient * diffuseColor.xyz;
     vec3 diffuse = light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor.xyz;
-    vec3 specular = light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * diffuseColor;
-    return ambient+diffuse+specular;
+    vec3 specular = light.specular * pow(max(dot(reflection, view), 0.0), shininess/1.0f) * diffuseColor;
+    return diffuse+specular;
 }
 
 vec3 calcPointLight(PointLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view, vec3 position){
     vec3 light_dir = normalize(light.position - position);
     vec3 reflection = reflect(-light_dir, normal);
-    float distance_light = length(-light.position - position);
+    float distance_light = length(-light.position + position);
     float attentuation = 1.0f / (1.0f + (light.linear * distance_light) + (light.quadratic * distance_light * distance_light));
-    vec3 ambient = attentuation * light.ambient * diffuseColor;
     vec3 diffuse = attentuation * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
-    vec3 specular = attentuation * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * diffuseColor;
-    return ambient+diffuse+specular;
+    vec3 specular = attentuation * light.specular * pow(max(dot(view, reflection), 0.0), shininess) * diffuseColor;
+    return diffuse+specular;
 }
 
 vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 normal, vec3 view, vec3 position){
@@ -68,20 +63,18 @@ vec3 calcSpotLight(SpotLight light, vec3 diffuseColor, float shininess, vec3 nor
     vec3 reflection = reflect(-light_dir, normal);
     float theta = dot(light_dir, normalize(light.direction));
     float epsilon = light.innerCone - light.outerCone;
-    float distance_light = length(-light.position - position);
+    float distance_light = length(-light.position + position);
     float attentuation = 1.0f / (1.0f + (light.outerCone * distance_light));
     float intensity = clamp((theta - light.outerCone) / epsilon, 0.0f, 1.0f);
-    vec3 ambient, specular, diffuse;
+    vec3  specular, diffuse;
     if (theta > light.outerCone){
         diffuse = intensity * light.diffuse * max(dot(normal, light_dir), 0.0) * diffuseColor;
-        specular = intensity * light.specular * pow(max(dot(reflection, view), 0.1), shininess/1.0f) * diffuseColor;
-        ambient = light.ambient * diffuseColor;
+        specular = intensity * light.specular * pow(max(dot(reflection, view), 0.0), shininess) * diffuseColor;
     } else {
         diffuse = vec3(0.0);
         specular = vec3(0.0);
-        ambient = light.ambient * diffuseColor;
     }
-    return ambient+diffuse+specular;
+    return diffuse+specular;
 }
 
 void main()
@@ -126,25 +119,13 @@ void main()
     vec3 view = normalize(-FragPos);
     // f_color = vec4(color + u_material.emissive, 1.0f);
     vec3 color = vec3(0.0f);
-    vec3 d0 = calcDirLight(u_dir_lights[0],Diffuse, Specular, Normal, view, FragPos);
-    vec3 p0 = calcPointLight(u_point_lights[0],Diffuse, Specular, Normal, view, FragPos);
-    vec3 p1 = calcPointLight(u_point_lights[1],Diffuse, Specular, Normal, view, FragPos);
-    vec3 p2 = calcPointLight(u_point_lights[2],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s0 = calcSpotLight(u_spot_lights[0],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s1 = calcSpotLight(u_spot_lights[1],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s2 = calcSpotLight(u_spot_lights[2],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s3 = calcSpotLight(u_spot_lights[3],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s4 = calcSpotLight(u_spot_lights[4],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s5 = calcSpotLight(u_spot_lights[5],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s6 = calcSpotLight(u_spot_lights[6],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s7 = calcSpotLight(u_spot_lights[7],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s8 = calcSpotLight(u_spot_lights[8],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s9 = calcSpotLight(u_spot_lights[9],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s10 = calcSpotLight(u_spot_lights[10],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s11 = calcSpotLight(u_spot_lights[11],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s12 = calcSpotLight(u_spot_lights[12],Diffuse, Specular, Normal, view, FragPos);
-    vec3 s13 = calcSpotLight(u_spot_lights[13],Diffuse, Specular, Normal, view, FragPos);
-    color = s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+d0+p0+p1+p2;
+    color += calcDirLight(u_dir_lights[0],Diffuse, Specular, Normal, view, FragPos);
+    for (int i=0;i<=2;i++){
+        color+=calcPointLight(u_point_lights[i],Diffuse, Specular, Normal, view, FragPos);
+    }
+    for (int i=0;i<=13;i++){
+        color+=calcSpotLight(u_spot_lights[i],Diffuse, Specular, Normal, view, FragPos);
+    }
     
     gl_FragDepth = 1000.0f/(FragPos.z);
     const float gamma = 2.1;

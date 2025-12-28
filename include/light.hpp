@@ -3,23 +3,26 @@
 
 class Light {
    public:
-    Light(int i, glm::vec3 d, glm::vec3 s, glm::vec3 a);
+    Light(string name, Shader* shader, glm::vec3 d, glm::vec3 s);
 
-    Light(int i, glm::vec3 d, float a);
+    Light(string name, Shader* shader, glm::vec3 d);
 
    protected:
-    string index;
+    string lightName;
     glm::vec3 diffuse;
     glm::vec3 specular;
-    glm::vec3 ambient;
 };
 
 class DirLight : public Light {
    public:
-    DirLight(int i, Shader* shader, glm::vec3 dir, glm::vec3 d, float a);
-    DirLight(int i, Shader* shader, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a);
+    DirLight(int i, Shader* shader, glm::vec3 dir, glm::vec3 d);
+    DirLight(int i, Shader* shader, glm::vec3 dir, glm::vec3 d, glm::vec3 s);
 
     void update(glm::mat4 view, glm::mat4 posMat);
+
+#ifdef _DEBUG
+    void renderDebugUI();
+#endif
 
    private:
     glm::vec4 direction;
@@ -28,11 +31,15 @@ class DirLight : public Light {
 
 class PointLight : public Light {
    public:
-    PointLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 d, float a, float l, float q);
-    PointLight(int i, Shader* shader, glm::vec3 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q);
-    PointLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 d, glm::vec3 s, glm::vec3 a, float l, float q);
+    PointLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 d, float l, float q);
+    PointLight(int i, Shader* shader, glm::vec3 pos, glm::vec3 d, glm::vec3 s, float l, float q);
+    PointLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 d, glm::vec3 s, float l, float q);
 
     void update(glm::mat4 view, glm::mat4 posMat);
+
+#ifdef _DEBUG
+    void renderDebugUI();
+#endif
 
    private:
     glm::vec4 position;
@@ -41,13 +48,15 @@ class PointLight : public Light {
 
 class SpotLight : public Light {
    public:
-    SpotLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 dir, glm::vec3 d, float a, float in, float o);
-    SpotLight(int i, Shader* shader, glm::vec3 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float in,
-              float o);
-    SpotLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, glm::vec3 a, float in,
-              float o);
+    SpotLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 dir, glm::vec3 d, float in, float o);
+    SpotLight(int i, Shader* shader, glm::vec3 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, float in, float o);
+    SpotLight(int i, Shader* shader, glm::vec4 pos, glm::vec3 dir, glm::vec3 d, glm::vec3 s, float in, float o);
 
     void update(glm::mat4 view, glm::mat4 posMat);
+
+#ifdef _DEBUG
+    void renderDebugUI();
+#endif
 
    private:
     glm::vec4 position;

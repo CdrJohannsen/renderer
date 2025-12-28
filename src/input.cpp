@@ -28,7 +28,6 @@ bool handleInput(SDL_Event &e, FloatingCamera &camera) {
         else if (e.type == SDL_KEYDOWN) {
             if (e.key.keysym.sym == SDLK_ESCAPE && !SDL_GetRelativeMouseMode()) {
                 SDL_SetRelativeMouseMode(SDL_TRUE);
-                cout << "test" << endl;
             } else if (e.key.keysym.sym == SDLK_ESCAPE && SDL_GetRelativeMouseMode()) {
                 SDL_SetRelativeMouseMode(SDL_FALSE);
             }

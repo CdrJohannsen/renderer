@@ -5,7 +5,12 @@
 #include <fstream>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 #include <iostream>
+#ifdef _DEBUG
+#include "imgui.h"
+#endif
 
 Mesh::Mesh(vector<Vert> &vertices, uint64_t numVertices, vector<uint32_t> &indices, uint64_t numIndices,
            Material material, Shader *shader) {
@@ -99,24 +104,24 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
         if (light.type == 0) {
             cout << "Error when loading Model: undefined light source";
         } else if (light.type == 1) {
-            DirLight l(numDir, light_shader, light.direction, light.diffuse, light.specular, light.ambient);
+            DirLight l(numDir, light_shader, light.direction, light.diffuse, light.specular);
             numDir++;
             dir_lights.push_back(l);
         } else if (light.type == 2) {
-            PointLight l(numPoint, light_shader, light.position, light.diffuse, light.specular, light.ambient,
-                         light.linear, light.quadratic);
+            PointLight l(numPoint, light_shader, light.position, light.diffuse, light.specular, light.linear,
+                         light.quadratic);
             numPoint++;
             point_lights.push_back(l);
         } else if (light.type == 3) {
             SpotLight l(numSpot, light_shader, light.position, light.direction, light.diffuse, light.specular,
-                        light.ambient, cos(light.innerCone / 2), cos(light.outerCone / 2));
+                        cos(light.innerCone / 2), cos(light.outerCone / 2));
             numSpot++;
             spot_lights.push_back(l);
         }
     }
     // Add "sun" if there are no lights
     if (numLights == 0) {
-        DirLight light(0, light_shader, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), 0.4f);
+        DirLight light(0, light_shader, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f));
         dir_lights.push_back(light);
     }
     shader->bind();
@@ -265,6 +270,29 @@ void Model::render() {
         mesh->render();
     }
 }
+
+#ifdef _DEBUG
+void Model::renderDebugUI() {
+    if (ImGui::TreeNode("DirLights")) {
+        for (DirLight &light : dir_lights) {
+            light.renderDebugUI();
+        }
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("PointLights")) {
+        for (PointLight &light : point_lights) {
+            light.renderDebugUI();
+        }
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("SpotLights")) {
+        for (SpotLight &light : spot_lights) {
+            light.renderDebugUI();
+        }
+        ImGui::TreePop();
+    }
+}
+#endif
 
 Model::~Model() {
     for (Mesh *mesh : meshes) {

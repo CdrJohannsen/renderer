@@ -11,9 +11,10 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 
-Object::Object(string n, char *filename, Shader *shader, Shader *light_shader, glm::vec3 p, glm::vec3 r, glm::vec3 s) {
+Object::Object(char *filename, Shader *shader, Shader *light_shader, glm::vec3 p, glm::vec3 r, glm::vec3 s) {
     model.init(filename, shader, light_shader);
-    name = n;
+    string filenameString = filename;
+    name = filenameString.substr(filenameString.find_last_of("/") + 1);
     position = p;
     rotation = r;
     size = s;
@@ -57,7 +58,9 @@ void Object::rotate(float angle, float x, float y, float z) {
 void Object::renderDebugUI() {
     if (ImGui::TreeNode(name.c_str())) {
         ImGui::DragFloat3("Pos", (float *)&position, 0.1, -FLT_MAX, +FLT_MAX);
+        model.renderDebugUI();
         ImGui::TreePop();
     }
+    move(0, 0, 0);
 }
 #endif

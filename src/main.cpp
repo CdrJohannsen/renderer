@@ -17,10 +17,11 @@ using namespace std;
 // #include <SDL2/SDL_opengl.h>
 #include <stb/stb_image.h>
 
-#include <cmath>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 #include "cubemap.hpp"
 #include "floating_camera.hpp"
@@ -33,8 +34,8 @@ using namespace std;
 #include "shader.hpp"
 
 #define WIDTH 1920.0f
-#define HEIGTH 1080.0f
-#define RATIO 1920.0f / 1080.0f
+#define HEIGHT 1080.0f
+#define RATIO (WIDTH / HEIGHT)
 
 void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
                          const void *userParam) {
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-    uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
+    uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
@@ -64,7 +65,7 @@ int main(int argc, char **argv) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
-    window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, flags);
+    window = SDL_CreateWindow("Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, flags);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
     if (!glContext) {
         cout << "No context" << endl;
@@ -99,8 +100,8 @@ int main(int argc, char **argv) {
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -125,8 +126,6 @@ int main(int argc, char **argv) {
     Shader fontShader("shaders/font.vert", "shaders/font.frag");
     Shader postProcessShader("shaders/post.vert", "shaders/post.frag");
     Shader skyboxShader("shaders/sky.vert", "shaders/sky.frag");
-    Shader shader("shaders/basic.vert", "shaders/basic.frag");
-    shader.bind();
     Shader gBufferShader("shaders/gBuffer.vert", "shaders/gBuffer.frag");
     Shader deferredShader("shaders/deferred.vert", "shaders/deferred.frag");
 
@@ -152,9 +151,13 @@ int main(int argc, char **argv) {
 
     // Model modelTree;
     // modelTree.init(argv[1],&shader);
-    Object testfield("Testfield",argv[1], &gBufferShader, &deferredShader, {0, 0, 0});
+    std::vector<Object *> objects;
 
-    FloatingCamera camera(90.0f, 1920.0f, 1080.0f);
+    for (int i = 1; i < argc; i++) {
+        objects.push_back(new Object(argv[i], &gBufferShader, &deferredShader, {0, 0, 0}));
+    }
+
+    FloatingCamera camera(90.0f, WIDTH, HEIGHT);
     // camera.translate(glm::vec3(0.0f,0.0f,5.0f));
     camera.update();
 
@@ -163,7 +166,9 @@ int main(int argc, char **argv) {
     // (textureUniformLocation != -1){ glUniform1i(textureUniformLocation,0);
     // }
     int w, h;
-    SDL_GetWindowSize(window, &w, &h);
+    // SDL_GetWindowSize(window, &w, &h);
+    w = WIDTH;
+    h = HEIGHT;
 
     unsigned int cubemapTexture = loadCubemap(getCubemapTextures());
     GLuint skyboxVAO = getSkyboxVAO();
@@ -203,10 +208,6 @@ int main(int argc, char **argv) {
         ImGui::NewFrame();
 #endif
 
-        // testfield.move(0.0f,delta,0.0f);
-
-        // model=glm::rotate(model,1.0f*delta,glm::vec3(0,1,0));
-
         // sun.update(camera.getView());
         // point.update(camera.getView(),glm::mat4(1.0f));
         // spot.update(camera.getView(),glm::mat4(1.0f));
@@ -218,7 +219,9 @@ int main(int argc, char **argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         gBufferShader.bind();
 
-        testfield.render(camera);
+        for (Object *object : objects) {
+            object->render(camera);
+        }
         gBuffer.unbind();
         gBufferShader.unbind();
 
@@ -226,7 +229,9 @@ int main(int argc, char **argv) {
 
         deferredShader.bind();
         gBuffer.bindTexture();
-        testfield.updateLights(camera);
+        for (Object *object : objects) {
+            object->updateLights(camera);
+        }
         // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -302,15 +307,16 @@ int main(int argc, char **argv) {
 #ifdef _DEBUG
 
         ImGui::Begin("Objects");
-        testfield.renderDebugUI();
-        testfield.move(0, 0, 0);
+        for (Object *object : objects) {
+            object->renderDebugUI();
+        }
         ImGui::End();
 
         ImGui::Begin("Info");
         ImGui::Text("Frametime: %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::Text(camera.getPositionString().c_str());
-        ImGui::Text(camera.getViewString().c_str());
-        ImGui::Text(camera.getLookAtString().c_str());
+        ImGui::Text("%s", camera.getPositionString().c_str());
+        ImGui::Text("%s", camera.getViewString().c_str());
+        ImGui::Text("%s", camera.getLookAtString().c_str());
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
