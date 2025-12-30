@@ -18,8 +18,9 @@ struct GBuffer {
     GLuint fbo;
     GLuint gPosition;
     GLuint gNormal;
-    GLuint gColorSpec;
+    GLuint gColor;
     GLuint gEmissive;
+    GLuint gMRA;
     uint32_t width;
     uint32_t heigth;
 };

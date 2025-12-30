@@ -21,16 +21,20 @@ Mesh::Mesh(vector<Vert> &vertices, uint64_t numVertices, vector<uint32_t> &indic
     vertexBuffer = new VertexBuffer(vertices.data(), vertices.size());
     indexBuffer = new IndexBuffer(indices.data(), indices.size(), sizeof(indices[0]));
 
-    diffuseLocation = glGetUniformLocation(shader->getShaderID(), "u_material.diffuse");
-    specularLocation = glGetUniformLocation(shader->getShaderID(), "u_material.specular");
+    albedoLocation = glGetUniformLocation(shader->getShaderID(), "u_material.albedo");
     emissiveLocation = glGetUniformLocation(shader->getShaderID(), "u_material.emissive");
-    shininessLocation = glGetUniformLocation(shader->getShaderID(), "u_material.shininess");
-    diffuseMapLocation = glGetUniformLocation(shader->getShaderID(), "u_diffuse_map");
+    metallicLocation = glGetUniformLocation(shader->getShaderID(), "u_material.metallic");
+    roughnessLocation = glGetUniformLocation(shader->getShaderID(), "u_material.roughness");
+    albedoMapLocation = glGetUniformLocation(shader->getShaderID(), "u_albedo_map");
     normalMapLocation = glGetUniformLocation(shader->getShaderID(), "u_normal_map");
-    specularMapLocation = glGetUniformLocation(shader->getShaderID(), "u_specular_map");
-    hasDiffuseLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasDiffuse");
+    metallicMapLocation = glGetUniformLocation(shader->getShaderID(), "u_metallic_map");
+    roughnessMapLocation = glGetUniformLocation(shader->getShaderID(), "u_roughness_map");
+    aoMapLocation = glGetUniformLocation(shader->getShaderID(), "u_ao_map");
+    hasAlbedoLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasAlbedo");
     hasNormalLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasNormal");
-    hasSpecularLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasSpecular");
+    hasMetallicLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasMetallic");
+    hasRoughnessLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasRoughness");
+    hasAoLocation = glGetUniformLocation(shader->getShaderID(), "u_material.hasAo");
 }
 
 Mesh::~Mesh() {
@@ -41,26 +45,36 @@ Mesh::~Mesh() {
 inline void Mesh::render() {
     vertexBuffer->bind();
     indexBuffer->bind();
-    glUniform3fv(diffuseLocation, 1, (float *)&material.material.diffuse);
-    glUniform3fv(specularLocation, 1, (float *)&material.material.specular);
+    glUniform3fv(albedoLocation, 1, (float *)&material.material.albedo);
     glUniform3fv(emissiveLocation, 1, (float *)&material.material.emissive);
-    glUniform1f(shininessLocation, material.material.shininess);
+    glUniform1f(metallicLocation, material.material.metallic);
+    glUniform1f(roughnessLocation, material.material.roughness);
 
-    glUniform1i(hasDiffuseLocation, material.material.hasDiffuse);
+    glUniform1i(hasAlbedoLocation, material.material.hasAlbedo);
     glUniform1i(hasNormalLocation, material.material.hasNormal);
-    glUniform1i(hasSpecularLocation, material.material.hasSpecular);
+    glUniform1i(hasMetallicLocation, material.material.hasMetallic);
+    glUniform1i(hasRoughnessLocation, material.material.hasRoughness);
+    glUniform1i(hasAoLocation, material.material.hasAo);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
-    glUniform1i(diffuseMapLocation, 0);
+    glBindTexture(GL_TEXTURE_2D, material.albedoMap);
+    glUniform1i(albedoMapLocation, 0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, material.normalMap);
     glUniform1i(normalMapLocation, 1);
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, material.specularMap);
-    glUniform1i(specularMapLocation, 2);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, material.metallicMap);
+    glUniform1i(metallicMapLocation, 2);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, material.roughnessMap);
+    glUniform1i(roughnessMapLocation, 3);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, material.aoMap);
+    glUniform1i(aoMapLocation, 4);
 
     glActiveTexture(GL_TEXTURE0);
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
@@ -89,32 +103,26 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
         input.read((char *)&light, sizeof(ModLight));
         if (light.type == 1) {
             glm::vec3 scale(4.0f);
-            light.diffuse /= scale;
-            light.specular /= scale;
-            light.ambient /= scale;
-            light.ambient = light.diffuse * 0.4f;
+            light.color /= scale;
         } else {
             light.direction *= inv;
             glm::vec3 scale(5000.0f);
-            light.diffuse /= scale;
-            light.specular /= scale;
-            light.ambient /= scale;
+            light.color /= scale;
         }
 
         if (light.type == 0) {
             cout << "Error when loading Model: undefined light source";
         } else if (light.type == 1) {
-            DirLight l(numDir, light_shader, light.direction, light.diffuse, light.specular);
+            DirLight l(numDir, light_shader, light.direction, light.color);
             numDir++;
             dir_lights.push_back(l);
         } else if (light.type == 2) {
-            PointLight l(numPoint, light_shader, light.position, light.diffuse, light.specular, light.linear,
-                         light.quadratic);
+            PointLight l(numPoint, light_shader, light.position, light.color, light.linear, light.quadratic);
             numPoint++;
             point_lights.push_back(l);
         } else if (light.type == 3) {
-            SpotLight l(numSpot, light_shader, light.position, light.direction, light.diffuse, light.specular,
-                        cos(light.innerCone / 2), cos(light.outerCone / 2));
+            SpotLight l(numSpot, light_shader, light.position, light.direction, light.color, cos(light.innerCone / 2),
+                        cos(light.outerCone / 2));
             numSpot++;
             spot_lights.push_back(l);
         }
@@ -132,33 +140,41 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
         Material material = {};
         input.read((char *)&material, sizeof(ModMaterial));
 
-        uint64_t diffuseMapNameLength = 0;
-        input.read((char *)&diffuseMapNameLength, sizeof(uint64_t));
-        std::string diffuseMapName(diffuseMapNameLength, '\0');
-        input.read((char *)&diffuseMapName[0], diffuseMapNameLength);
+        uint64_t albedoMapNameLength = 0;
+        input.read((char *)&albedoMapNameLength, sizeof(uint64_t));
+        std::string albedoMapName(albedoMapNameLength, '\0');
+        input.read((char *)&albedoMapName[0], albedoMapNameLength);
 
         uint64_t normalMapNameLength = 0;
         input.read((char *)&normalMapNameLength, sizeof(uint64_t));
         std::string normalMapName(normalMapNameLength, '\0');
         input.read((char *)&normalMapName[0], normalMapNameLength);
 
-        uint64_t specularMapNameLength = 0;
-        input.read((char *)&specularMapNameLength, sizeof(uint64_t));
-        std::string specularMapName(specularMapNameLength, '\0');
-        input.read((char *)&specularMapName[0], specularMapNameLength);
+        uint64_t metallicMapNameLength = 0;
+        input.read((char *)&metallicMapNameLength, sizeof(uint64_t));
+        std::string metallicMapName(metallicMapNameLength, '\0');
+        input.read((char *)&metallicMapName[0], metallicMapNameLength);
+
+        uint64_t roughnessMapNameLength = 0;
+        input.read((char *)&roughnessMapNameLength, sizeof(uint64_t));
+        std::string roughnessMapName(roughnessMapNameLength, '\0');
+        input.read((char *)&roughnessMapName[0], roughnessMapNameLength);
+
+        uint64_t aoMapNameLength = 0;
+        input.read((char *)&aoMapNameLength, sizeof(uint64_t));
+        std::string aoMapName(aoMapNameLength, '\0');
+        input.read((char *)&aoMapName[0], aoMapNameLength);
 
         int32_t textureWidth = 0;
         int32_t textureHeigth = 0;
         int32_t bitsPerPixel = 0;
-        glGenTextures(3, &material.diffuseMap);
         stbi_set_flip_vertically_on_load(true);
-        if (material.material.hasDiffuse) {
-            auto textureBuffer = stbi_load(diffuseMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
-            // assert(textureBuffer);
-            // assert(material.diffuseMap);
+        if (material.material.hasAlbedo) {
+            glGenTextures(1, &material.albedoMap);
+            auto textureBuffer = stbi_load(albedoMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
 
             if (textureBuffer) {
-                glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+                glBindTexture(GL_TEXTURE_2D, material.albedoMap);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -172,9 +188,8 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
         }
 
         if (material.material.hasNormal) {
+            glGenTextures(1, &material.normalMap);
             auto textureBuffer = stbi_load(normalMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
-            // assert(textureBuffer);
-            // assert(material.normalMap);
 
             if (textureBuffer) {
                 glBindTexture(GL_TEXTURE_2D, material.normalMap);
@@ -190,13 +205,48 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
             }
         }
 
-        if (material.material.hasSpecular) {
-            auto textureBuffer = stbi_load(specularMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
-            // assert(textureBuffer);
-            // assert(material.specularMap);
+        if (material.material.hasMetallic) {
+            glGenTextures(1, &material.metallicMap);
+            auto textureBuffer = stbi_load(metallicMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
 
             if (textureBuffer) {
-                glBindTexture(GL_TEXTURE_2D, material.specularMap);
+                glBindTexture(GL_TEXTURE_2D, material.metallicMap);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeigth, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             textureBuffer);
+
+                stbi_image_free(textureBuffer);
+            }
+        }
+
+        if (material.material.hasRoughness) {
+            glGenTextures(1, &material.roughnessMap);
+            auto textureBuffer = stbi_load(roughnessMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
+
+            if (textureBuffer) {
+                glBindTexture(GL_TEXTURE_2D, material.roughnessMap);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeigth, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             textureBuffer);
+
+                stbi_image_free(textureBuffer);
+            }
+        }
+
+        if (material.material.hasAo) {
+            glGenTextures(1, &material.aoMap);
+            auto textureBuffer = stbi_load(aoMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
+
+            if (textureBuffer) {
+                glBindTexture(GL_TEXTURE_2D, material.aoMap);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

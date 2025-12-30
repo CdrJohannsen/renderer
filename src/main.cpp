@@ -181,8 +181,9 @@ int main(int argc, char **argv) {
     deferredShader.bind();
     deferredShader.setInt("gPosition", 0);
     deferredShader.setInt("gNormal", 1);
-    deferredShader.setInt("gColorSpec", 2);
+    deferredShader.setInt("gColor", 2);
     deferredShader.setInt("gEmissive", 3);
+    deferredShader.setInt("gMRA", 4);
 
     glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -227,6 +228,7 @@ int main(int argc, char **argv) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        framebuffer.bind();
         deferredShader.bind();
         gBuffer.bindTexture();
         for (Object *object : objects) {
@@ -254,29 +256,25 @@ int main(int argc, char **argv) {
         skyboxShader.unbind();
         glDepthFunc(GL_LESS);
 
-        // framebuffer.unbind();
+        framebuffer.unbind();
 
-        /*
         // Post Processing
 
         postProcessShader.bind();
-        GLuint pPTextureLocation =
-        glGetUniformLocation(postProcessShader.getShaderID(), "u_texture"); GLuint
-        pPDepthLocation = glGetUniformLocation(postProcessShader.getShaderID(),
-        "u_depth");
+        GLuint pPTextureLocation = glGetUniformLocation(postProcessShader.getShaderID(), "u_texture");
+        GLuint pPDepthLocation = glGetUniformLocation(postProcessShader.getShaderID(), "u_depth");
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, framebuffer.getTextureID(0));
-        glUniform1i(pPTextureLocation,0);
+        glUniform1i(pPTextureLocation, 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, framebuffer.getTextureID(1));
-        glUniform1i(pPDepthLocation,1);
+        glUniform1i(pPDepthLocation, 1);
 
         glActiveTexture(GL_TEXTURE0);
-        glDrawArrays(GL_TRIANGLES,0,3);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         postProcessShader.unbind();
-        */
         // Font overlay
         /*
         fontShader.bind();

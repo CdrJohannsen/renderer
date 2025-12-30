@@ -6,12 +6,12 @@ in vec2 v_texCoord;
 uniform sampler2D u_texture;
 uniform sampler2D u_depth;
 
-const float offset = 1.0 / 3000.0; 
+const float offset = 1.0 / 600.0; 
 
 void main(){
     vec4 color = texture2D(u_texture,v_texCoord);
     vec4 depth = texture2D(u_depth,v_texCoord);
-    FragColor = color;
+    FragColor=color;
     return;
 
     vec2 offsets[9] = vec2[](
@@ -27,9 +27,9 @@ void main(){
             );
 
     float kernel[9] = float[](
-            1, 1, 1,
-            1,  -8.0, 1,
-            1, 1, 1
+            1./9., 1./9., 1./9.,
+            1./9., 1./9., 1./9.,
+            1./9., 1./9., 1./9.
             );
 
     vec3 sampleTex[9];

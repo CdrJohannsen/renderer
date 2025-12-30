@@ -2,8 +2,9 @@
 
 layout(location = 0) out vec3 gPosition;
 layout(location = 1) out vec3 gNormal;
-layout(location = 2) out vec4 gColorSpec;
-layout(location = 3) out vec4 gEmissive;
+layout(location = 2) out vec4 gColor;
+layout(location = 3) out vec3 gEmissive;
+layout(location = 4) out vec3 gMRA;
 
 in vec3 v_position;
 in vec2 v_texCoord;
@@ -11,20 +12,25 @@ in mat3 v_tbn;
 in vec3 v_normal;
 
 struct Material {
-    vec3 diffuse;
-    vec3 specular;
+    vec3 albedo;
+    vec3 normal;
     vec3 emissive;
-    float shininess;
-    bool hasDiffuse;
+    float metallic;
+    float roughness;
+    bool hasAlbedo;
     bool hasNormal;
-    bool hasSpecular;
+    bool hasMetallic;
+    bool hasRoughness;
+    bool hasAo;
 };
 
 uniform Material u_material;
 
-uniform sampler2D u_diffuse_map;
+uniform sampler2D u_albedo_map;
 uniform sampler2D u_normal_map;
-uniform sampler2D u_specular_map;
+uniform sampler2D u_metallic_map;
+uniform sampler2D u_roughness_map;
+uniform sampler2D u_ao_map;
 
 void main()
 {
@@ -41,33 +47,40 @@ void main()
         //normal = vec3(1.0f);
     }
 
-    vec4 diffuseColor;
-    if (u_material.hasDiffuse) {
-        diffuseColor = texture(u_diffuse_map, v_texCoord);;
+    vec4 albedoColor;
+    if (u_material.hasAlbedo) {
+        albedoColor = texture(u_albedo_map, v_texCoord);
     } else {
-        diffuseColor = vec4(u_material.diffuse,1.0f);
+        albedoColor = vec4(u_material.albedo,1.0f);
     }
 
-    float shininess;
-    if (u_material.hasSpecular) {
-        shininess = texture(u_specular_map,v_texCoord).r;
+    float metallic;
+    if (u_material.hasMetallic) {
+        metallic = texture(u_metallic_map,v_texCoord).r;
     } else {
-        shininess = u_material.shininess;
+        metallic = u_material.metallic;
     }
 
-    if (diffuseColor.w < 0.9){
+    float roughness;
+    if (u_material.hasRoughness) {
+        roughness = texture(u_roughness_map,v_texCoord).r;
+    } else {
+        roughness = u_material.roughness;
+    }
+
+    float ao;
+    if (u_material.hasAo) {
+        ao = texture(u_ao_map,v_texCoord).r;
+    }
+
+    if (albedoColor.w < 0.9){
         discard;
     }
     gPosition = v_position;
     gNormal = normal;
-    gColorSpec.rgb = diffuseColor.rgb;
-    gColorSpec.a = shininess;
+    gColor= albedoColor;
     gEmissive.rgb = u_material.emissive;
-
-    /*
-    gPosition = v_position;
-    gNormal = vec3(1.0f);
-    gColorSpec.rgb = vec3(1.0f);
-    gColorSpec.a = 1.0f;
-    */
+    gMRA.r = metallic;
+    gMRA.g = roughness;
+    gMRA.b = ao;
 }

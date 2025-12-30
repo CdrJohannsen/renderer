@@ -13,29 +13,32 @@
 // #include "index_buffer.h"
 
 struct ModMaterial {
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    glm::vec3 albedo;
+    glm::vec3 normal;
     glm::vec3 emissive;
-    float shininess;
-    bool hasDiffuse = false;
+    float metallic;
+    float roughness;
+    bool hasAlbedo = false;
     bool hasNormal = false;
-    bool hasSpecular = false;
+    bool hasMetallic = false;
+    bool hasRoughness = false;
+    bool hasAo = false;
 };
 
 struct Material {
     ModMaterial material;
-    GLuint diffuseMap;
+    GLuint albedoMap;
     GLuint normalMap;
-    GLuint specularMap;
+    GLuint metallicMap;
+    GLuint roughnessMap;
+    GLuint aoMap;
 };
 
 struct ModLight {
     int8_t type;  // 1: Direction  2: Point  3: Spot
     glm::vec3 position;
     glm::vec3 direction;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-    glm::vec3 ambient;
+    glm::vec3 color;
     float innerCone;
     float outerCone;
     float linear;
@@ -57,16 +60,20 @@ class Mesh {
     Shader* shader;
     Material material;
     uint64_t numIndices = 0;
-    int diffuseLocation;
-    int specularLocation;
+    int albedoLocation;
     int emissiveLocation;
-    int shininessLocation;
-    int diffuseMapLocation;
+    int metallicLocation;
+    int roughnessLocation;
+    int albedoMapLocation;
     int normalMapLocation;
-    int specularMapLocation;
-    int hasDiffuseLocation;
+    int metallicMapLocation;
+    int roughnessMapLocation;
+    int aoMapLocation;
+    int hasAlbedoLocation;
     int hasNormalLocation;
-    int hasSpecularLocation;
+    int hasMetallicLocation;
+    int hasRoughnessLocation;
+    int hasAoLocation;
 };
 
 class Model {
