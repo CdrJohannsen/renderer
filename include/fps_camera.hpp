@@ -20,6 +20,8 @@ class FPSCamera : public Camera {
 
     string getLookAtString();
 
+    const glm::vec3 &getLookAt() { return lookAt; }
+
    protected:
     float yaw;
     float pitch;

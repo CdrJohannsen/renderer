@@ -1,16 +1,19 @@
 #include "renderUtils.hpp"
 #include <GL/glew.h>
-#include <SDL2/SDL.h>
 
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad() {
     if (quadVAO == 0) {
+        // clang-format off
         float quadVertices[] = {
             // positions        // texture Coords
-            -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         };
+        // clang-format on
         // setup plane VAO
         glGenVertexArrays(1, &quadVAO);
         glGenBuffers(1, &quadVBO);

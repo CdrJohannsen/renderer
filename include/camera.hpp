@@ -23,6 +23,8 @@ class Camera {
     virtual void translate(glm::vec3 v);
     string getPositionString();
 
+    const glm::vec3 &getPosition() { return position; }
+
    protected:
     glm::vec3 position;
     glm::mat4 projection;

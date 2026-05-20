@@ -5,10 +5,10 @@
 
 class Object {
    public:
-    Object(char* filename, Shader* shader, Shader* light_shader, glm::vec3 p, glm::vec3 r = {0, 0, 0},
+    Object(string filename, Shader* shader, Shader* light_shader, glm::vec3 p, glm::vec3 r = {0, 0, 0},
            glm::vec3 s = {1, 1, 1});
 
-    void render(FloatingCamera camera);
+    void render(FloatingCamera* camera);
 
     void updateLights(FloatingCamera camera);
 

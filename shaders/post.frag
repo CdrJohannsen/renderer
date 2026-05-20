@@ -12,6 +12,9 @@ void main(){
     vec4 color = texture2D(u_texture,v_texCoord);
     vec4 depth = texture2D(u_depth,v_texCoord);
     FragColor=color;
+    if ((v_texCoord.x<=0.5005)&&(v_texCoord.x>=0.4995)&&(v_texCoord.y<=0.5005)&&(v_texCoord.y>=0.4995)){
+        FragColor=vec4(vec3(1)-color.rgb,1);
+    }
     return;
 
     vec2 offsets[9] = vec2[](

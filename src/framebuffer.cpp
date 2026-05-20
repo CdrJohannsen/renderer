@@ -1,7 +1,7 @@
 #include "framebuffer.hpp"
 
 #include <GL/glew.h>
-#include <SDL2/SDL.h>
+#include <iostream>
 
 void FrameBuffer::create(uint32_t width, uint32_t heigth) {
     glGenFramebuffers(1, &fbo);

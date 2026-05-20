@@ -78,7 +78,7 @@ class Mesh {
 
 class Model {
    public:
-    void init(char* filename, Shader* shader, Shader* light_shader);
+    void init(string filename, Shader* shader, Shader* light_shader);
 
     void updateLights(glm::mat4 view, glm::mat4 pos);
 

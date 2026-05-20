@@ -11,7 +11,7 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 
-Object::Object(char *filename, Shader *shader, Shader *light_shader, glm::vec3 p, glm::vec3 r, glm::vec3 s) {
+Object::Object(string filename, Shader *shader, Shader *light_shader, glm::vec3 p, glm::vec3 r, glm::vec3 s) {
     model.init(filename, shader, light_shader);
     string filenameString = filename;
     name = filenameString.substr(filenameString.find_last_of("/") + 1);
@@ -27,9 +27,9 @@ Object::Object(char *filename, Shader *shader, Shader *light_shader, glm::vec3 p
     modelViewProjLocation = glGetUniformLocation(shader->getShaderID(), "u_modelViewProj");
 }
 
-void Object::render(FloatingCamera camera) {
-    modelViewProj = camera.getViewProj() * modelMat;
-    modelView = camera.getView() * modelMat;
+void Object::render(FloatingCamera *camera) {
+    modelViewProj = camera->getViewProj() * modelMat;
+    modelView = camera->getView() * modelMat;
     invModelView = glm::transpose(glm::inverse(modelView));
     glUniformMatrix4fv(modelViewLocation, 1, GL_FALSE, &modelView[0][0]);
     glUniformMatrix4fv(invModelViewLocation, 1, GL_FALSE, &invModelView[0][0]);

@@ -1,7 +1,5 @@
 #include "gbuffer.hpp"
 
-#include <SDL2/SDL.h>
-
 #include <iostream>
 using namespace std;
 
@@ -93,6 +91,7 @@ void GBuffer::bindTexture() {
     glBindTexture(GL_TEXTURE_2D, gEmissive);
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, gMRA);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void GBuffer::blitFramebuffer() {

@@ -3,9 +3,12 @@
 
 # too large model
 cube_floor.mod
+# Ignore all ressources because they are big files that change often
+ressources/
 
 ressources/
 protocols/
 
 build
 .cache
+protocols

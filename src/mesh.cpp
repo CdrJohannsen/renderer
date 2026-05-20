@@ -64,15 +64,15 @@ inline void Mesh::render() {
     glBindTexture(GL_TEXTURE_2D, material.normalMap);
     glUniform1i(normalMapLocation, 1);
 
-    glActiveTexture(GL_TEXTURE3);
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, material.metallicMap);
     glUniform1i(metallicMapLocation, 2);
 
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, material.roughnessMap);
     glUniform1i(roughnessMapLocation, 3);
 
-    glActiveTexture(GL_TEXTURE5);
+    glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, material.aoMap);
     glUniform1i(aoMapLocation, 4);
 
@@ -80,7 +80,7 @@ inline void Mesh::render() {
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 }
 
-void Model::init(char *filename, Shader *shader, Shader *light_shader) {
+void Model::init(string filename, Shader *shader, Shader *light_shader) {
     uint64_t numMeshes = 0;
     uint64_t numMaterials = 0;
     uint64_t numLights = 0;
@@ -184,12 +184,14 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
                              textureBuffer);
 
                 stbi_image_free(textureBuffer);
+            } else {
+                cerr << "Failed to load albedo map " << stbi_failure_reason() << endl;
             }
         }
 
         if (material.material.hasNormal) {
             glGenTextures(1, &material.normalMap);
-            auto textureBuffer = stbi_load(normalMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
+            auto textureBuffer = stbi_load(normalMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 3);
 
             if (textureBuffer) {
                 glBindTexture(GL_TEXTURE_2D, material.normalMap);
@@ -198,16 +200,18 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeigth, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, textureWidth, textureHeigth, 0, GL_RGB, GL_UNSIGNED_BYTE,
                              textureBuffer);
 
                 stbi_image_free(textureBuffer);
+            } else {
+                cerr << "Failed to load normal map " << stbi_failure_reason() << endl;
             }
         }
 
         if (material.material.hasMetallic) {
             glGenTextures(1, &material.metallicMap);
-            auto textureBuffer = stbi_load(metallicMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 4);
+            auto textureBuffer = stbi_load(metallicMapName.c_str(), &textureWidth, &textureHeigth, &bitsPerPixel, 1);
 
             if (textureBuffer) {
                 glBindTexture(GL_TEXTURE_2D, material.metallicMap);
@@ -216,10 +220,12 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeigth, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, textureWidth, textureHeigth, 0, GL_RED, GL_UNSIGNED_BYTE,
                              textureBuffer);
 
                 stbi_image_free(textureBuffer);
+            } else {
+                cerr << "Failed to load metallic map " << stbi_failure_reason() << endl;
             }
         }
 
@@ -238,6 +244,8 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
                              textureBuffer);
 
                 stbi_image_free(textureBuffer);
+            } else {
+                cerr << "Failed to load roughness map " << stbi_failure_reason() << endl;
             }
         }
 
@@ -256,6 +264,8 @@ void Model::init(char *filename, Shader *shader, Shader *light_shader) {
                              textureBuffer);
 
                 stbi_image_free(textureBuffer);
+            } else {
+                cerr << "Failed to load ao map " << stbi_failure_reason() << endl;
             }
         }
         glBindTexture(GL_TEXTURE_2D, 0);

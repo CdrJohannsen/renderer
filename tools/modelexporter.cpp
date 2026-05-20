@@ -167,7 +167,7 @@ void processMaterials(const aiScene* scene) {
         uint32_t numDiffuseMaps = material->GetTextureCount(aiTextureType_DIFFUSE);
         uint32_t numNormalMaps = material->GetTextureCount(aiTextureType_NORMALS);
         uint32_t numMetalMaps = material->GetTextureCount(aiTextureType_METALNESS);
-        uint32_t numRoughnessMaps = material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS);
+        uint32_t numRoughnessMaps = material->GetTextureCount(aiTextureType_SHININESS);
         uint32_t numAoMaps = material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION);
         if (numDiffuseMaps > 0) {
             material->GetTexture(aiTextureType_DIFFUSE, 0, &mat.albedoMapName);
@@ -182,7 +182,7 @@ void processMaterials(const aiScene* scene) {
             mat.hasMetallic = true;
         }
         if (numRoughnessMaps > 0) {
-            material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &mat.roughnessMapName);
+            material->GetTexture(aiTextureType_SHININESS, 0, &mat.roughnessMapName);
             mat.hasRoughness = true;
         }
         if (numAoMaps > 0) {
@@ -224,9 +224,9 @@ int main(int argc, char** argv) {
     const aiScene* scene = importer.ReadFile(
         argv[argc - 1], aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_GenNormals |
                             aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices |
-                            aiProcess_ImproveCacheLocality | aiProcess_CalcTangentSpace | aiProcess_FindInstances);
+                            aiProcess_ImproveCacheLocality | aiProcess_FindInstances);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE, !scene->mRootNode) {
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         cout << "Error while loading model with assimp: " << importer.GetErrorString() << endl;
         return 1;
     }
