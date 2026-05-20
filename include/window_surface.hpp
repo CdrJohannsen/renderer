@@ -18,6 +18,8 @@ class WindowSurface : public Surface {
 
     void setTitle(string title) { title_ = title; }
     void setAppID(string id) { appId_ = id; }
+    void setMinSize(glm::vec2 minSize) { minSize_ = minSize; }
+    void setMaxSize(glm::vec2 maxSize) { maxSize_ = maxSize; }
 
     virtual void motion(glm::vec3 pos, glm::vec3 rot);
 
@@ -54,6 +56,9 @@ class WindowSurface : public Surface {
     glm::vec3 position{0, 0, 3};
     glm::vec3 rotation{0, 0, 1};
     glm::vec2 size{200, 200};
+
+    glm::vec2 minSize_{0, 0};
+    glm::vec2 maxSize_{0, 0};
 
     glm::mat4 modelMat;
     glm::mat4 modelView;

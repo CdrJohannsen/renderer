@@ -121,7 +121,7 @@ void Window::renderDebugUI() {
         // glm::vec3 rot = {glm::degrees(asin(rotation.x)), glm::degrees(asin(rotation.y)),
         //                  glm::degrees(asin(rotation.z))};
         glm::vec2 s = size;
-        ImGui::DragFloat2("Size", (float *)&s, 1, -FLT_MAX, +FLT_MAX);
+        ImGui::DragFloat2("Size", (float *)&s, 1, 0, FLT_MAX);
         ImGui::DragFloat3("Pos", (float *)&position, 0.1, -FLT_MAX, +FLT_MAX);
         // ImGui::DragFloat3("Rot", (float *)&rot, 1, -360, 360);
         // rotation = {sin(glm::radians(rot.x)), sin(glm::radians(rot.y)), sin(glm::radians(rot.z))};

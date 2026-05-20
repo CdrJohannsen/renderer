@@ -125,9 +125,9 @@ bool handleInput(SDL_Event &e, FloatingCamera &camera, SDL_Window *window,
                 if (grabbedWindow != -1) {
                     glm::vec3 rot = camera.getLookAt();
                     if (!resize) {
-                        windows[grabbedWindow]->rotate(camera.getPosition(), rot);
                         windows[grabbedWindow]->move((rot * glm::vec3(grabbedDistance)) -
                                                      (oldRot * glm::vec3(grabbedDistance)));
+                        windows[grabbedWindow]->rotate(camera.getPosition(), rot);
                     } else {
                         glm::vec3 diff = (rot - oldRot) * static_cast<float>(grabbedDistance);
                         glm::vec2 res = {glm::dot(glm::cross(rot, {0, 1, 0}), diff), diff.y};

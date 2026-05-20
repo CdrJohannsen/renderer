@@ -168,9 +168,15 @@ static void resize(struct wl_client *client, struct wl_resource *resource, struc
     // TODO ?
 }
 
-static void set_max_size(struct wl_client *client, struct wl_resource *resource, int32_t width, int32_t height) {}
+static void set_max_size(struct wl_client *client, struct wl_resource *resource, int32_t width, int32_t height) {
+    struct xdg_toplevel *toplevel = static_cast<struct xdg_toplevel *>(wl_resource_get_user_data(resource));
+    toplevel->window->setMaxSize(glm::vec2(width, height));
+}
 
-static void set_min_size(struct wl_client *client, struct wl_resource *resource, int32_t width, int32_t height) {}
+static void set_min_size(struct wl_client *client, struct wl_resource *resource, int32_t width, int32_t height) {
+    struct xdg_toplevel *toplevel = static_cast<struct xdg_toplevel *>(wl_resource_get_user_data(resource));
+    toplevel->window->setMinSize(glm::vec2(width, height));
+}
 
 static void set_maximized(struct wl_client *client, struct wl_resource *resource) {}
 

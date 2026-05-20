@@ -249,6 +249,10 @@ void WindowSurface::move(glm::vec3 mov) { position += mov; }
 void WindowSurface::resize(glm::vec2 diff) {
     size.x += diff.x * kSurfaceScaling;
     size.y += diff.y * kSurfaceScaling;
+    if ((maxSize_.x > 0) && (maxSize_.y > 0)) {
+        size = min(size, maxSize_);
+    }
+    size = max(size, minSize_);
     configure();
 }
 
