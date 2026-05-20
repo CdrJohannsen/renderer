@@ -4,5 +4,8 @@
 # too large model
 cube_floor.mod
 
+ressources/
+protocols/
+
 build
 .cache
